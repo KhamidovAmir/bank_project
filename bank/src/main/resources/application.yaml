@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: bank
+jwt:
+  secret: "replace-this-with-long-secret-key-at-least-32-bytes"
+  expiration: 3600000
