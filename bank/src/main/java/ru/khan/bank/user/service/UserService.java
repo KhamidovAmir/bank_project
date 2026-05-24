@@ -1,8 +1,14 @@
 package ru.khan.bank.user.service;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.khan.bank.auth.dto.JwtUser;
+import ru.khan.bank.auth.service.AuthUserProvider;
+import ru.khan.bank.user.UserMapper;
 import ru.khan.bank.user.dto.CreateUserCommand;
+import ru.khan.bank.user.dto.UserProfileResponse;
 import ru.khan.bank.user.entity.User;
 import ru.khan.bank.user.entity.UserRole;
 import ru.khan.bank.user.entity.UserStatus;
@@ -12,9 +18,13 @@ import ru.khan.bank.user.repository.UserRepository;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
+    private final AuthUserProvider userProvider;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, AuthUserProvider userProvider) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
+        this.userProvider = userProvider;
     }
 
     @Transactional
@@ -38,6 +48,19 @@ public class UserService {
     public User getUserByEmailOrThrow(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+    }
+
+    public UserProfileResponse getProfile(){
+        JwtUser jwtUser = userProvider.getCurrentUser();
+        User user = userRepository.findByEmail(jwtUser.email())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return userMapper.toUserProfileResponse(
+                user.getEmail(),
+                user.getPublicId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRole().name(),
+                user.getStatus().name());
     }
 
     public boolean isActive(User user){
