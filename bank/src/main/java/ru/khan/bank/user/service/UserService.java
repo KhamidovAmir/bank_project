@@ -50,10 +50,14 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
     }
 
-    public UserProfileResponse getProfile(){
+    public User getCurrentUser(){
         JwtUser jwtUser = userProvider.getCurrentUser();
-        User user = userRepository.findByEmail(jwtUser.email())
+        return userRepository.findByEmail(jwtUser.email())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public UserProfileResponse getProfile(){
+        User user = getCurrentUser();
         return userMapper.toUserProfileResponse(
                 user.getEmail(),
                 user.getPublicId(),
