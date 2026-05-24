@@ -2,8 +2,8 @@ package ru.khan.bank.auth.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.khan.bank.auth.config.SecurityConfig;
 import ru.khan.bank.auth.dto.CreateUserRequest;
+import ru.khan.bank.auth.dto.LoginRequest;
 import ru.khan.bank.auth.dto.TokenResponse;
 import ru.khan.bank.user.dto.CreateUserCommand;
 import ru.khan.bank.user.entity.User;
@@ -37,5 +37,21 @@ public class AuthService {
 
         return new TokenResponse(tokenService.generateToken(user));
 
+    }
+
+    public TokenResponse login(LoginRequest request){
+
+        User user = userService.getUserByEmailOrThrow(request.email());
+
+        if(!passwordMatch(request.password(), user))
+            throw new RuntimeException("Invalid email or password");
+
+        if (!userService.isActive(user))
+            throw new RuntimeException("Authentication failed");
+
+        return new TokenResponse(tokenService.generateToken(user));
+    }
+    private boolean passwordMatch(String password, User user) {
+        return passwordEncoder.matches(password, user.getPasswordHash());
     }
 }

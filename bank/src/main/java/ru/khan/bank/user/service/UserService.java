@@ -2,10 +2,10 @@ package ru.khan.bank.user.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.khan.bank.auth.dto.CreateUserRequest;
 import ru.khan.bank.user.dto.CreateUserCommand;
 import ru.khan.bank.user.entity.User;
 import ru.khan.bank.user.entity.UserRole;
+import ru.khan.bank.user.entity.UserStatus;
 import ru.khan.bank.user.repository.UserRepository;
 
 @Service
@@ -16,6 +16,7 @@ public class UserService {
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+
     @Transactional
     public User createUser(CreateUserCommand command) {
 
@@ -31,6 +32,16 @@ public class UserService {
                 );
 
         return userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public User getUserByEmailOrThrow(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+    }
+
+    public boolean isActive(User user){
+        return user.getStatus() == UserStatus.ACTIVE;
     }
 
 }

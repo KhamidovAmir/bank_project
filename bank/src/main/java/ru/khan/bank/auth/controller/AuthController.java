@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.khan.bank.auth.dto.CreateUserRequest;
+import ru.khan.bank.auth.dto.LoginRequest;
 import ru.khan.bank.auth.dto.TokenResponse;
 import ru.khan.bank.auth.service.AuthService;
 
@@ -23,5 +24,10 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<TokenResponse> register(@Valid @RequestBody CreateUserRequest request){
         return ResponseEntity.status(201).body(authService.register(request));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request){
+        return ResponseEntity.ok(authService.login(request));
     }
 }
