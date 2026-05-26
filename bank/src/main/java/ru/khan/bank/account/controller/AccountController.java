@@ -1,13 +1,12 @@
 package ru.khan.bank.account.controller;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.khan.bank.account.dto.CreateAccountRequest;
 import ru.khan.bank.account.dto.CreateAccountResponse;
+import ru.khan.bank.account.entity.AccountSort;
 import ru.khan.bank.account.service.AccountService;
 
 @RestController
@@ -23,5 +22,13 @@ public class AccountController {
     @PostMapping
     public ResponseEntity<CreateAccountResponse> createAccount(@Valid @RequestBody CreateAccountRequest request){
         return ResponseEntity.status(201).body(accountService.createAccount(request));
+    }
+
+    @PostMapping("/my")
+    public Page<?> getMyAccounts(@RequestParam(value = "size", defaultValue = "20") Integer size,
+                                 @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                 @RequestParam(value = "sort") AccountSort sort,
+                                 @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
+        return accountService.getMyAccounts(size, page, sort, asc);
     }
 }
