@@ -4,17 +4,22 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.khan.bank.account.dto.AccountPageResponse;
+import ru.khan.bank.account.dto.AccountResponse;
 import ru.khan.bank.account.dto.CreateAccountRequest;
 import ru.khan.bank.account.dto.CreateAccountResponse;
 import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.account.entity.AccountSort;
+import ru.khan.bank.account.entity.AccountStatus;
 import ru.khan.bank.account.mapper.AccountMapper;
 import ru.khan.bank.account.repository.AccountRepository;
 import ru.khan.bank.user.entity.User;
 import ru.khan.bank.user.service.UserService;
+
+import java.util.UUID;
 
 @Service
 public class AccountService {
@@ -57,5 +62,23 @@ public class AccountService {
                         a.getCurrency(),
                         a.getStatus()
                         ));
+    }
+
+    public AccountResponse getAccountByPublicId(UUID publicId) {
+        User user = userService.getCurrentUser();
+
+        Account account = accountRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        if (!account.getOwner().getId().equals(user.getId()))
+            throw new RuntimeException("You don't have access to this perform");
+
+        return accountMapper.toAccountResponse(
+                account.getPublicId(),
+                account.getAccountNumber(),
+                account.getBalance(),
+                account.getCurrency(),
+                account.getStatus()
+        );
     }
 }

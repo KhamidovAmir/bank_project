@@ -4,10 +4,13 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.khan.bank.account.dto.AccountResponse;
 import ru.khan.bank.account.dto.CreateAccountRequest;
 import ru.khan.bank.account.dto.CreateAccountResponse;
 import ru.khan.bank.account.entity.AccountSort;
 import ru.khan.bank.account.service.AccountService;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/accounts")
@@ -30,5 +33,10 @@ public class AccountController {
                                  @RequestParam(value = "sort") AccountSort sort,
                                  @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
         return accountService.getMyAccounts(size, page, sort, asc);
+    }
+
+    @GetMapping("/{publicId}")
+    public AccountResponse getAccount(@PathVariable("publicId") UUID publicId) {
+        return accountService.getAccountByPublicId(publicId);
     }
 }
