@@ -81,4 +81,13 @@ public class AccountService {
                 account.getStatus()
         );
     }
+
+    public void closeAccount(UUID publicId) {
+        User user = userService.getCurrentUser();
+        var account = accountRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+        if (!account.getOwner().getId().equals(user.getId()))
+            throw new RuntimeException("You don't have access to this perform");
+        account.close();
+    }
 }

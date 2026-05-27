@@ -39,4 +39,9 @@ public class AccountController {
     public AccountResponse getAccount(@PathVariable("publicId") UUID publicId) {
         return accountService.getAccountByPublicId(publicId);
     }
+    @PatchMapping("/{public}/close")
+    public ResponseEntity<Void> closeAccount(@PathVariable("public") UUID publicId) {
+        accountService.closeAccount(publicId);
+        return ResponseEntity.ok().build();
+    }
 }
