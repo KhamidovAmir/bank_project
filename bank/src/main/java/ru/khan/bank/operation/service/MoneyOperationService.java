@@ -61,6 +61,8 @@ public class MoneyOperationService {
         }
 
     }
+    
+    @Transactional
     public void withdraw(String idempotencyKey, WithdrawRequest request) {
         ensureIdempotencyKeyIsNotUsed(idempotencyKey);
 
