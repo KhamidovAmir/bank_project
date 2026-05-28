@@ -1,4 +1,4 @@
-package ru.khan.bank.operation;
+package ru.khan.bank.operation.dto;
 
 import java.math.BigDecimal;
 import java.util.UUID;
