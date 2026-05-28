@@ -103,6 +103,9 @@ public class Account {
 
         changeStatus(AccountStatus.CLOSED);
     }
+    public Boolean ensureActive() {
+        return this.status.equals(AccountStatus.ACTIVE);
+    }
 
     private void changeStatus(AccountStatus newStatus) {
         validateStatusTransition(newStatus);
