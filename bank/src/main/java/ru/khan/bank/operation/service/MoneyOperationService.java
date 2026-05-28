@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.account.service.AccountService;
 import ru.khan.bank.operation.dto.DepositRequest;
-import ru.khan.bank.operation.dto.WithdrawRequest;
 import ru.khan.bank.operation.entity.MoneyOperation;
 import ru.khan.bank.operation.repository.MoneyOperationRepository;
 import ru.khan.bank.user.entity.User;
