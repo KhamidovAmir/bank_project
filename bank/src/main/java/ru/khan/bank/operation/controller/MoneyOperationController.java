@@ -2,7 +2,7 @@ package ru.khan.bank.operation.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.khan.bank.operation.DepositRequest;
+import ru.khan.bank.operation.dto.DepositRequest;
 import ru.khan.bank.operation.service.MoneyOperationService;
 
 @RestController
