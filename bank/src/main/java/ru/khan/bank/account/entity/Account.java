@@ -106,6 +106,9 @@ public class Account {
     public Boolean ensureActive() {
         return this.status.equals(AccountStatus.ACTIVE);
     }
+    public Boolean ensureIsOwner(Long userId) {
+        return this.owner.getId().equals(userId);
+    }
 
     private void changeStatus(AccountStatus newStatus) {
         validateStatusTransition(newStatus);
