@@ -1,9 +1,12 @@
 package ru.khan.bank.user.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.khan.bank.admin.dto.UsersPageableResponse;
 import ru.khan.bank.auth.dto.JwtUser;
 import ru.khan.bank.auth.service.AuthUserProvider;
 import ru.khan.bank.user.UserMapper;
@@ -70,5 +73,18 @@ public class UserService {
     public boolean isActive(User user){
         return user.getStatus() == UserStatus.ACTIVE;
     }
-
+    @Transactional(readOnly = true)
+    public Page<UsersPageableResponse> getUsers(Pageable pageable){
+        return userRepository.findAll(pageable)
+                .map(user ->
+                    userMapper.toUsersPageableResponse(
+                            user.getPublicId(),
+                            user.getFirstName(),
+                            user.getLastName(),
+                            user.getRole(),
+                            user.getStatus(),
+                            user.getCreatedAt()
+                            )
+                );
+    }
 }

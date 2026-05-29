@@ -1,12 +1,12 @@
 package ru.khan.bank.account.mapper;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import ru.khan.bank.account.dto.AccountPageResponse;
 import ru.khan.bank.account.dto.AccountResponse;
 import ru.khan.bank.account.dto.CreateAccountResponse;
 import ru.khan.bank.account.entity.AccountStatus;
 import ru.khan.bank.account.entity.Currency;
+import ru.khan.bank.admin.dto.AccountsPageableResponse;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -15,13 +15,15 @@ import java.util.UUID;
 public class AccountMapper {
 
     public CreateAccountResponse toCreateAccountResponse(UUID publicId, String accountNumber, BigDecimal balance, AccountStatus status) {
-        return  new CreateAccountResponse(publicId, accountNumber, balance, status);
+        return new CreateAccountResponse(publicId, accountNumber, balance, status);
     }
     public AccountPageResponse toAccountPageResponse(String accountNumber, BigDecimal balance, Currency currency, AccountStatus status) {
-        return  new AccountPageResponse(accountNumber, balance, currency, status);
+        return new AccountPageResponse(accountNumber, balance, currency, status);
     }
-
     public AccountResponse toAccountResponse(UUID publicId, String accountNumber, BigDecimal balance, Currency currency, AccountStatus status) {
         return new AccountResponse(publicId, accountNumber, balance, currency, status);
+    }
+    public AccountsPageableResponse toAccountsPageableResponse(UUID accountPublicId, String accountNumber, UUID ownerPublicId, String ownerFirstName, String ownerLastName, AccountStatus status) {
+        return new AccountsPageableResponse(accountPublicId, accountNumber, ownerPublicId, ownerFirstName, ownerLastName, status);
     }
 }

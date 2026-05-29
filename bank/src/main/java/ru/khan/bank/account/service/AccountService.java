@@ -13,6 +13,8 @@ import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.account.entity.AccountSort;
 import ru.khan.bank.account.mapper.AccountMapper;
 import ru.khan.bank.account.repository.AccountRepository;
+import ru.khan.bank.admin.dto.AccountsPageableResponse;
+import ru.khan.bank.admin.dto.UsersPageableResponse;
 import ru.khan.bank.user.entity.User;
 import ru.khan.bank.user.service.UserService;
 
@@ -53,7 +55,7 @@ public class AccountService {
         Pageable pageable = PageRequest.of(page, size, sort.toSort(asc));
 
         return accountRepository.findAllByOwner(user.getId(), pageable)
-                .map(a -> new AccountPageResponse(
+                .map(a -> accountMapper.toAccountPageResponse(
                         a.getAccountNumber(),
                         a.getBalance(),
                         a.getCurrency(),
@@ -88,7 +90,21 @@ public class AccountService {
         account.close();
     }
     public Account getAccount(UUID publicId) {
-        return  accountRepository.findByPublicId(publicId)
+        return accountRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AccountsPageableResponse> getAccounts(Pageable pageable) {
+        return accountRepository.findAll(pageable)
+                .map(account -> accountMapper.toAccountsPageableResponse(
+                        account.getPublicId(),
+                        account.getAccountNumber(),
+                        account.getOwner().getPublicId(),
+                        account.getOwner().getFirstName(),
+                        account.getOwner().getLastName(),
+                        account.getStatus()
+                        )
+                );
     }
 }

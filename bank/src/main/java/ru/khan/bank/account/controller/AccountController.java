@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.khan.bank.account.dto.AccountPageResponse;
 import ru.khan.bank.account.dto.AccountResponse;
 import ru.khan.bank.account.dto.CreateAccountRequest;
 import ru.khan.bank.account.dto.CreateAccountResponse;
@@ -28,10 +29,10 @@ public class AccountController {
     }
 
     @PostMapping("/my")
-    public Page<?> getMyAccounts(@RequestParam(value = "size", defaultValue = "20") Integer size,
-                                 @RequestParam(value = "page", defaultValue = "0") Integer page,
-                                 @RequestParam(value = "sort") AccountSort sort,
-                                 @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
+    public Page<AccountPageResponse> getMyAccounts(@RequestParam(value = "size", defaultValue = "20") Integer size,
+                                                   @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                   @RequestParam(value = "sort") AccountSort sort,
+                                                   @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
         return accountService.getMyAccounts(size, page, sort, asc);
     }
 
