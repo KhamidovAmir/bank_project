@@ -270,4 +270,7 @@ MVP — первая рабочая версия мини-банковской �
 - GET /api/admin/accounts
 - PATCH /api/admin/accounts/{accountId}/block
 - PATCH /api/admin/accounts/{accountId}/unblock
+- PATCH /api/admin/users/{userId}/block
+- PATCH /api/admin/users/{userId}/unblock
+- PATCH /api/admin/users/{userId}/delete
 - GET /api/admin/operations

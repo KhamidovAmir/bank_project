@@ -17,6 +17,8 @@ import ru.khan.bank.user.entity.UserRole;
 import ru.khan.bank.user.entity.UserStatus;
 import ru.khan.bank.user.repository.UserRepository;
 
+import java.util.UUID;
+
 @Service
 public class UserService {
 
@@ -86,5 +88,10 @@ public class UserService {
                             user.getCreatedAt()
                             )
                 );
+    }
+
+    public User getUserByPublicId(UUID publicUserId) {
+        return userRepository.findByPublicId(publicUserId)
+                .orElseThrow(() -> new RuntimeException("User with public id" + publicUserId + "not found"));
     }
 }

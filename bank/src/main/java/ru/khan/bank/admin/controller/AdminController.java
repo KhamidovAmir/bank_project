@@ -45,4 +45,19 @@ public class AdminController {
         adminService.unblockAccount(accountPublicId);
         return ResponseEntity.ok().build();
     }
+    @PatchMapping("/users/{userId}/block")
+    public ResponseEntity<Void> blockUser(@PathVariable UUID publicUserId){
+        adminService.blockUser(publicUserId);
+        return ResponseEntity.ok().build();
+    }
+    @PatchMapping("/users/{userId}/unblock")
+    public ResponseEntity<Void> unblockUser(@PathVariable UUID publicUserId){
+        adminService.unblockUser(publicUserId);
+        return ResponseEntity.ok().build();
+    }
+    @PatchMapping("/users/{userId}/delete")
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID publicUserId){
+        adminService.deleteUser(publicUserId);
+        return ResponseEntity.ok().build();
+    }
 }

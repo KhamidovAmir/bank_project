@@ -67,6 +67,30 @@ public class AdminService {
         account.block();
     }
 
+    public void blockUser(UUID publicUserId) {
+        User user = userService.getCurrentUser();
+        isAdmin(user);
+
+        User target = userService.getUserByPublicId(publicUserId);
+        target.block();
+    }
+
+    public void unblockUser(UUID publicUserId) {
+        User user = userService.getCurrentUser();
+        isAdmin(user);
+
+        User target = userService.getUserByPublicId(publicUserId);
+        target.activate();
+    }
+
+    public void deleteUser(UUID publicUserId) {
+        User user = userService.getCurrentUser();
+        isAdmin(user);
+
+        User target = userService.getUserByPublicId(publicUserId);
+        target.delete();
+    }
+
     private void isAdmin(User user) {
         if (user.getRole() != UserRole.ADMIN)
             throw new RuntimeException("You are not an admin");

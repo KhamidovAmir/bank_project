@@ -7,7 +7,9 @@ import org.springframework.stereotype.Repository;
 import ru.khan.bank.admin.dto.UsersPageableResponse;
 import ru.khan.bank.user.entity.User;
 
+import java.lang.ScopedValue;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -16,4 +18,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
     Page<User> findAll(Pageable pageable);
+
+    Optional<User> findByPublicId(UUID publicUserId);
 }
