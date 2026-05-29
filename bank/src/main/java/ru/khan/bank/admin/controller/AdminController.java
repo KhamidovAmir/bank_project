@@ -5,8 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.khan.bank.account.entity.AccountSort;
 import ru.khan.bank.admin.dto.AccountsPageableResponse;
+import ru.khan.bank.admin.dto.OperationsPageableResponse;
 import ru.khan.bank.admin.dto.UsersPageableResponse;
 import ru.khan.bank.admin.service.AdminService;
+import ru.khan.bank.operation.entity.OperationsSort;
 import ru.khan.bank.user.entity.UserSort;
 
 import java.util.UUID;
@@ -34,6 +36,13 @@ public class AdminController {
                                                       @RequestParam(value = "sort", defaultValue = "CREATED_AT") AccountSort sort,
                                                       @RequestParam(value = "asc", defaultValue = "true") Boolean asc){
         return adminService.getAccounts(size, page, sort, asc);
+    }
+    @GetMapping
+    public Page<OperationsPageableResponse> getOperations(@RequestParam(value = "size", defaultValue = "20") Integer size,
+                                                          @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                          @RequestParam(value = "sort", defaultValue = "CREATED_AT") OperationsSort sort,
+                                                          @RequestParam(value = "asc", defaultValue = "true") Boolean asc){
+        return adminService.getOperations(size, page, sort, asc);
     }
     @PatchMapping("/accounts/{accountPublicId}/block")
     public ResponseEntity<Void> blockAccount(@PathVariable UUID accountPublicId){

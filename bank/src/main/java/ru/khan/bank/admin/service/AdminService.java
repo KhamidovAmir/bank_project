@@ -9,7 +9,10 @@ import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.account.entity.AccountSort;
 import ru.khan.bank.account.service.AccountService;
 import ru.khan.bank.admin.dto.AccountsPageableResponse;
+import ru.khan.bank.admin.dto.OperationsPageableResponse;
 import ru.khan.bank.admin.dto.UsersPageableResponse;
+import ru.khan.bank.operation.entity.OperationsSort;
+import ru.khan.bank.operation.service.MoneyOperationService;
 import ru.khan.bank.user.entity.User;
 import ru.khan.bank.user.entity.UserRole;
 import ru.khan.bank.user.entity.UserSort;
@@ -22,10 +25,12 @@ public class AdminService {
 
     private final UserService userService;
     private final AccountService accountService;
+    private final MoneyOperationService moneyOperationService;
 
-    public AdminService(UserService userService, AccountService accountService) {
+    public AdminService(UserService userService, AccountService accountService, MoneyOperationService moneyOperationService) {
         this.userService = userService;
         this.accountService = accountService;
+        this.moneyOperationService = moneyOperationService;
     }
 
     public Page<UsersPageableResponse> getUsers(Integer size, Integer page, UserSort sort, Boolean asc) {
@@ -89,6 +94,13 @@ public class AdminService {
 
         User target = userService.getUserByPublicId(publicUserId);
         target.delete();
+    }
+
+    public Page<OperationsPageableResponse> getOperations(Integer size, Integer page, OperationsSort sort, Boolean asc) {
+        User user = userService.getCurrentUser();
+        isAdmin(user);
+        Pageable pageable = PageRequest.of(page, size, sort.toSort(asc));
+        return moneyOperationService.getOperations(pageable);
     }
 
     private void isAdmin(User user) {

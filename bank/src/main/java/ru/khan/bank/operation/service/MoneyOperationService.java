@@ -1,9 +1,13 @@
 package ru.khan.bank.operation.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.account.service.AccountService;
+import ru.khan.bank.admin.dto.OperationsPageableResponse;
+import ru.khan.bank.operation.MoneyOperationMapper;
 import ru.khan.bank.operation.dto.DepositRequest;
 import ru.khan.bank.operation.dto.TransferRequest;
 import ru.khan.bank.operation.dto.WithdrawRequest;
@@ -21,11 +25,13 @@ public class MoneyOperationService {
     private final MoneyOperationRepository moneyOperationRepository;
     private final UserService userService;
     private final AccountService accountService;
+    private final MoneyOperationMapper moneyOperationMapper;
 
-    public MoneyOperationService(MoneyOperationRepository moneyOperationRepository, UserService userService, AccountService accountService) {
+    public MoneyOperationService(MoneyOperationRepository moneyOperationRepository, UserService userService, AccountService accountService, MoneyOperationMapper moneyOperationMapper) {
         this.moneyOperationRepository = moneyOperationRepository;
         this.userService = userService;
         this.accountService = accountService;
+        this.moneyOperationMapper = moneyOperationMapper;
     }
 
     @Transactional
@@ -131,6 +137,21 @@ public class MoneyOperationService {
         } catch(RuntimeException e) {
             operation.fail(e.getMessage());
         }
+    }
+
+    public Page<OperationsPageableResponse> getOperations(Pageable pageable) {
+        return moneyOperationRepository.findAll(pageable)
+                .map(operation -> moneyOperationMapper.toOperationsPageable(
+                        operation.getPublicId(),
+                        operation.getType(),
+                        operation.getStatus(),
+                        operation.getFromAccountId(),
+                        operation.getToAccountId(),
+                        operation.getAmount(),
+                        operation.getCurrency(),
+                        operation.getCreatedAt(),
+                        operation.getCompletedAt()
+                ));
     }
 
     private String generateOperationNumber(){
