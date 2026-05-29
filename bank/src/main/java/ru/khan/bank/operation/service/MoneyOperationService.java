@@ -69,7 +69,12 @@ public class MoneyOperationService {
         User user = userService.getCurrentUser();
         Account account = accountService.getAccount(request.accountPublicId());
 
-        account.ensureIsOwner(user.getId());
+        if(!account.ensureIsOwner(user.getId()))
+            throw new RuntimeException("You don't have access to perform this action");
+
+        if(!account.ensureActive())
+            throw new RuntimeException("This account is not active");
+
         MoneyOperation operation = MoneyOperation.withdraw(
                 generateOperationNumber(),
                 account.getId(),
