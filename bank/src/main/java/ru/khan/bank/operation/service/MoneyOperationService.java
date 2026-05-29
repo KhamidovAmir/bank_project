@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.account.service.AccountService;
 import ru.khan.bank.operation.dto.DepositRequest;
+import ru.khan.bank.operation.dto.TransferRequest;
 import ru.khan.bank.operation.dto.WithdrawRequest;
 import ru.khan.bank.operation.entity.MoneyOperation;
 import ru.khan.bank.operation.repository.MoneyOperationRepository;
@@ -57,7 +58,6 @@ public class MoneyOperationService {
             operation.complete();
         } catch(RuntimeException e) {
             operation.fail(e.getMessage());
-            throw e;
         }
 
     }
@@ -89,9 +89,50 @@ public class MoneyOperationService {
             operation.complete();
         } catch(RuntimeException e) {
             operation.fail(e.getMessage());
-            throw e;
         }
     }
+
+    @Transactional
+    public void transfers(String idempotencyKey, TransferRequest request) {
+        ensureIdempotencyKeyIsNotUsed(idempotencyKey);
+
+        User user = userService.getCurrentUser();
+
+        Account from = accountService.getAccount(request.accountPublicIdFrom());
+        Account to = accountService.getAccount(request.accountPublicIdTo());
+
+        if (!from.ensureIsOwner(user.getId()))
+            throw new RuntimeException("You don't have access to perform this action");
+        if (!from.ensureActive())
+            throw new RuntimeException("Your account is not active");
+        if (!to.ensureActive())
+            throw new RuntimeException("Account you try transfer is not active");
+        if (from.getId().equals(to.getId()))
+            throw new RuntimeException("You try transfer the same account");
+        if (from.getCurrency() != to.getCurrency())
+            throw new RuntimeException("Currencies are not equal");
+
+        MoneyOperation operation = MoneyOperation.transfer(
+                generateOperationNumber(),
+                from.getId(),
+                to.getId(),
+                request.amount(),
+                from.getCurrency(),
+                request.description(),
+                idempotencyKey
+        );
+
+        moneyOperationRepository.save(operation);
+
+        try {
+            from.withdraw(request.amount());
+            to.deposit(request.amount());
+            operation.complete();
+        } catch(RuntimeException e) {
+            operation.fail(e.getMessage());
+        }
+    }
+
     private String generateOperationNumber(){
         return "OP-000" + UUID.randomUUID();
     }

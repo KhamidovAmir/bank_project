@@ -3,6 +3,7 @@ package ru.khan.bank.operation.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.khan.bank.operation.dto.DepositRequest;
+import ru.khan.bank.operation.dto.TransferRequest;
 import ru.khan.bank.operation.dto.WithdrawRequest;
 import ru.khan.bank.operation.service.MoneyOperationService;
 
@@ -26,6 +27,12 @@ public class MoneyOperationController {
     public ResponseEntity<Void> withdraw(@RequestHeader("Idempotency-Key") String idempotencyKey,
                                          @RequestBody WithdrawRequest request){
         moneyOperationService.withdraw(idempotencyKey, request);
+        return ResponseEntity.status(201).build();
+    }
+    @PostMapping("/transfers")
+    public ResponseEntity<Void> transfers(@RequestHeader("Idempotency-Key") String idempotencyKey,
+                                         @RequestBody TransferRequest request){
+        moneyOperationService.transfers(idempotencyKey, request);
         return ResponseEntity.status(201).build();
     }
 }
