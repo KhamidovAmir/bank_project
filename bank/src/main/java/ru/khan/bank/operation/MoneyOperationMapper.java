@@ -3,6 +3,7 @@ package ru.khan.bank.operation;
 import org.springframework.stereotype.Component;
 import ru.khan.bank.account.entity.Currency;
 import ru.khan.bank.admin.dto.OperationsPageableResponse;
+import ru.khan.bank.operation.dto.MoneyOperationsResponse;
 import ru.khan.bank.operation.entity.OperationStatus;
 import ru.khan.bank.operation.entity.OperationType;
 
@@ -25,5 +26,19 @@ public class MoneyOperationMapper {
                 createdAt,
                 completedAt
                 );
+    }
+    public MoneyOperationsResponse toMoneyOperationsResponse(UUID publicId, String operationNumber, OperationType type, OperationStatus status, Long fromAccountId, Long toAccountId, BigDecimal amount, Currency currency, LocalDateTime createdAt, LocalDateTime completedAt) {
+        return new MoneyOperationsResponse(
+                publicId,
+                operationNumber,
+                type,
+                status,
+                fromAccountId,
+                toAccountId,
+                amount,
+                currency,
+                createdAt,
+                completedAt
+        );
     }
 }

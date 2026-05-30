@@ -18,6 +18,7 @@ import ru.khan.bank.admin.dto.UsersPageableResponse;
 import ru.khan.bank.user.entity.User;
 import ru.khan.bank.user.service.UserService;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -54,7 +55,7 @@ public class AccountService {
 
         Pageable pageable = PageRequest.of(page, size, sort.toSort(asc));
 
-        return accountRepository.findAllByOwner(user.getId(), pageable)
+        return accountRepository.findAllByOwnerId(user.getId(), pageable)
                 .map(a -> accountMapper.toAccountPageResponse(
                         a.getAccountNumber(),
                         a.getBalance(),
@@ -106,5 +107,9 @@ public class AccountService {
                         account.getStatus()
                         )
                 );
+    }
+
+    public List<Long> getAllMyAccounts(Long ownerId) {
+        return accountRepository.findIdsByOwnerId(ownerId);
     }
 }

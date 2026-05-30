@@ -254,7 +254,6 @@ MVP — первая рабочая версия мини-банковской �
 - POST /api/accounts
 - GET /api/accounts
 - GET /api/accounts/{accountId}
-- GET /api/accounts/{accountId}/balance
 
 ### Operations
 
