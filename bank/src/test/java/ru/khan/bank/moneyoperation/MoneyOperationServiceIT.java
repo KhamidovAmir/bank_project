@@ -291,8 +291,12 @@ public class MoneyOperationServiceIT {
 
         when(userService.getCurrentUser()).thenReturn(user);
 
-        moneyOperationService.deposit("key-1", firstRequest);
-        moneyOperationService.deposit("key-2", secondRequest);
+        String firstIdempotencyKey = "deposit-" + UUID.randomUUID();
+        String secondIdempotencyKey = "deposit-" + UUID.randomUUID();
+
+
+        moneyOperationService.deposit(firstIdempotencyKey, firstRequest);
+        moneyOperationService.deposit(secondIdempotencyKey, secondRequest);
 
         var firstPage = moneyOperationService.getAllMyOperations(1, 0, OperationsSort.OPERATIONS_TYPE, true);
         var secondPage = moneyOperationService.getAllMyOperations(1, 1, OperationsSort.OPERATIONS_TYPE, true);
@@ -316,7 +320,9 @@ public class MoneyOperationServiceIT {
         DepositRequest anotherRequest = new DepositRequest(accountForAnotherUser.getPublicId(), new BigDecimal("50.00"), null);
 
         when(userService.getCurrentUser()).thenReturn(anotherUser);
-        moneyOperationService.deposit("key-3", anotherRequest);
+
+        String anotherIdempotencyKey = "deposit-" + UUID.randomUUID();
+        moneyOperationService.deposit(anotherIdempotencyKey, anotherRequest);
         /*
             Current user and his operations
         */
@@ -330,14 +336,17 @@ public class MoneyOperationServiceIT {
 
         when(userService.getCurrentUser()).thenReturn(currentUser);
 
-        moneyOperationService.deposit("key-1", firstRequest);
-        moneyOperationService.deposit("key-2", secondRequest);
+        String firstIdempotencyKey = "deposit-" + UUID.randomUUID();
+        String secondIdempotencyKey = "deposit-" + UUID.randomUUID();
+
+        moneyOperationService.deposit(firstIdempotencyKey, firstRequest);
+        moneyOperationService.deposit(secondIdempotencyKey, secondRequest);
 
         var result = moneyOperationService.getAllMyOperations(10, 0, OperationsSort.OPERATIONS_TYPE, true);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(2);
-        
+
         assertThat(result.getContent())
                 .allMatch(operation ->
                         (operation.toAccountId().equals(firstAccount.getId())) ||
