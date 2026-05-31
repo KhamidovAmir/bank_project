@@ -67,9 +67,9 @@ public class MoneyOperationServiceIT {
                 new BigDecimal("100.00"),
                 "test");
 
-        moneyOperationService.deposit(
-                "deposit-key-1",
-                request);
+        String idempotencyKey = "deposit-" + UUID.randomUUID();
+
+        moneyOperationService.deposit(idempotencyKey, request);
 
         Account updateAccount = accountRepository.findByPublicId(account.getPublicId())
                 .orElseThrow();
@@ -78,7 +78,7 @@ public class MoneyOperationServiceIT {
                 getBalance()).
                 isEqualByComparingTo(new BigDecimal("100.00"));
 
-        MoneyOperation operation = moneyOperationRepository.findByIdempotencyKey("deposit-key-1").orElseThrow();
+        MoneyOperation operation = moneyOperationRepository.findByIdempotencyKey(idempotencyKey).orElseThrow();
 
         assertThat(operation).isNotNull();
 
@@ -113,7 +113,9 @@ public class MoneyOperationServiceIT {
                 "test"
         );
 
-        moneyOperationService.withdraw("withdraw-key-1", request);
+        String idempotencyKey = "withdraw-" + UUID.randomUUID();
+
+        moneyOperationService.withdraw(idempotencyKey, request);
 
         Account updateAccount = accountRepository.findByPublicId(account.getPublicId())
                 .orElseThrow();
@@ -122,7 +124,7 @@ public class MoneyOperationServiceIT {
                 getBalance()).
                 isEqualByComparingTo(new BigDecimal("10.00"));
 
-        MoneyOperation operation = moneyOperationRepository.findByIdempotencyKey("withdraw-key-1").orElseThrow();
+        MoneyOperation operation = moneyOperationRepository.findByIdempotencyKey(idempotencyKey).orElseThrow();
 
         assertThat(operation).isNotNull();
 
@@ -160,12 +162,14 @@ public class MoneyOperationServiceIT {
                 "test"
                 );
 
-        moneyOperationService.transfers("transfer-key-1", request);
+        String idempotencyKey = "transfer-" + UUID.randomUUID();
+
+        moneyOperationService.transfers(idempotencyKey, request);
 
         firstAccount = accountRepository.findByPublicId(firstAccount.getPublicId()).orElseThrow();
         secondAccount = accountRepository.findByPublicId(secondAccount.getPublicId()).orElseThrow();
 
-        MoneyOperation operation = moneyOperationRepository.findByIdempotencyKey("transfer-key-1").orElseThrow();
+        MoneyOperation operation = moneyOperationRepository.findByIdempotencyKey(idempotencyKey).orElseThrow();
 
         assertThat(operation).isNotNull();
 
