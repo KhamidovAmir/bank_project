@@ -13,8 +13,11 @@ import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.account.entity.Currency;
 import ru.khan.bank.account.repository.AccountRepository;
 import ru.khan.bank.operation.dto.DepositRequest;
+import ru.khan.bank.operation.dto.TransferRequest;
 import ru.khan.bank.operation.dto.WithdrawRequest;
 import ru.khan.bank.operation.entity.MoneyOperation;
+import ru.khan.bank.operation.entity.OperationStatus;
+import ru.khan.bank.operation.entity.OperationType;
 import ru.khan.bank.operation.repository.MoneyOperationRepository;
 import ru.khan.bank.operation.service.MoneyOperationService;
 import ru.khan.bank.user.entity.User;
@@ -139,7 +142,45 @@ public class MoneyOperationServiceIT {
 
     @Test
     void transfers_shouldTransferAccountBalanceAndCreateMoneyOperation() {
+        User firstUser = createUser();
+        User secondUser = createUser();
+
+        Account firstAccount = createAccount(firstUser, Currency.RUB);
+        Account secondAccount = createAccount(secondUser, Currency.RUB);
+
+        firstAccount.deposit(new BigDecimal("20.00"));
+        firstAccount = accountRepository.save(firstAccount);
+
+        when(userService.getCurrentUser()).thenReturn(firstUser);
+
+        TransferRequest request = new TransferRequest(
+                firstAccount.getPublicId(),
+                secondAccount.getPublicId(),
+                new BigDecimal("10.00"),
+                "test"
+                );
+
+        moneyOperationService.transfers("transfer-key-1", request);
+
+        firstAccount = accountRepository.findByPublicId(firstAccount.getPublicId()).orElseThrow();
+        secondAccount = accountRepository.findByPublicId(secondAccount.getPublicId()).orElseThrow();
+
+        MoneyOperation operation = moneyOperationRepository.findByIdempotencyKey("transfer-key-1").orElseThrow();
+
+        assertThat(operation).isNotNull();
+
+        assertThat(operation.getAmount()).isEqualByComparingTo(new BigDecimal("10.00"));
+
+        assertThat(operation.getFromAccountId()).isEqualTo(firstAccount.getId());
+        assertThat(operation.getToAccountId()).isEqualTo(secondAccount.getId());
+
+        assertThat(operation.getType()).isEqualTo(OperationType.TRANSFER);
+        assertThat(operation.getStatus()).isEqualTo(OperationStatus.COMPLETED);
+
+        assertThat(firstAccount.getBalance()).isEqualByComparingTo(new BigDecimal("10.00"));
+        assertThat(secondAccount.getBalance()).isEqualByComparingTo(new BigDecimal("10.00"));
     }
+    
 
     private User createUser(){
         return userRepository.save(
