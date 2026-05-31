@@ -1,5 +1,7 @@
 package ru.khan.bank.moneyoperation;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -53,6 +55,13 @@ public class MoneyOperationServiceIT {
 
     @MockitoBean
     private UserService userService;
+
+    @AfterEach
+    void cleanDb() {
+        moneyOperationRepository.deleteAll();
+        userRepository.deleteAll();
+        accountRepository.deleteAll();
+    }
 
     @Test
     void deposit_shouldIncreaseAccountBalanceAndCreateMoneyOperation() {
