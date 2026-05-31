@@ -18,6 +18,7 @@ import ru.khan.bank.operation.dto.WithdrawRequest;
 import ru.khan.bank.operation.entity.MoneyOperation;
 import ru.khan.bank.operation.entity.OperationStatus;
 import ru.khan.bank.operation.entity.OperationType;
+import ru.khan.bank.operation.entity.OperationsSort;
 import ru.khan.bank.operation.repository.MoneyOperationRepository;
 import ru.khan.bank.operation.service.MoneyOperationService;
 import ru.khan.bank.user.entity.User;
@@ -28,10 +29,9 @@ import ru.khan.bank.user.service.UserService;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.when;
-
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -277,6 +277,74 @@ public class MoneyOperationServiceIT {
 
         assertThat(firstAccount.getBalance()).isEqualByComparingTo(new BigDecimal("10.00"));
         assertThat(secondAccount.getBalance()).isEqualByComparingTo(new BigDecimal("10.00"));
+    }
+
+    @Test
+    void getAllMyOperations_shouldReturnPaginationResult(){
+        User user = createUser();
+
+        Account firstAccount = createAccount(user, Currency.RUB);
+        Account secondAccount = createAccount(user, Currency.RUB);
+
+        DepositRequest firstRequest = new DepositRequest(firstAccount.getPublicId(), new BigDecimal("20.00"), null);
+        DepositRequest secondRequest = new DepositRequest(secondAccount.getPublicId(), new BigDecimal("20.00"), null);
+
+        when(userService.getCurrentUser()).thenReturn(user);
+
+        moneyOperationService.deposit("key-1", firstRequest);
+        moneyOperationService.deposit("key-2", secondRequest);
+
+        var firstPage = moneyOperationService.getAllMyOperations(1, 0, OperationsSort.OPERATIONS_TYPE, true);
+        var secondPage = moneyOperationService.getAllMyOperations(1, 1, OperationsSort.OPERATIONS_TYPE, true);
+
+        assertThat(firstPage.getTotalElements()).isEqualTo(2);
+        assertThat(firstPage.getTotalPages()).isEqualTo(2);
+        assertThat(firstPage.getContent()).hasSize(1);
+
+        assertThat(secondPage.getContent()).hasSize(1);
+
+    }
+
+    @Test
+    void getAllMyOperations_shouldReturnOnlyCurrentUserOperations(){
+        /*
+            Another user and his operations
+        */
+        User anotherUser = createUser();
+
+        Account accountForAnotherUser = createAccount(anotherUser, Currency.RUB);
+        DepositRequest anotherRequest = new DepositRequest(accountForAnotherUser.getPublicId(), new BigDecimal("50.00"), null);
+
+        when(userService.getCurrentUser()).thenReturn(anotherUser);
+        moneyOperationService.deposit("key-3", anotherRequest);
+        /*
+            Current user and his operations
+        */
+        User currentUser = createUser();
+
+        Account firstAccount = createAccount(currentUser, Currency.RUB);
+        Account secondAccount = createAccount(currentUser, Currency.RUB);
+
+        DepositRequest firstRequest = new DepositRequest(firstAccount.getPublicId(), new BigDecimal("20.00"), null);
+        DepositRequest secondRequest = new DepositRequest(secondAccount.getPublicId(), new BigDecimal("20.00"), null);
+
+        when(userService.getCurrentUser()).thenReturn(currentUser);
+
+        moneyOperationService.deposit("key-1", firstRequest);
+        moneyOperationService.deposit("key-2", secondRequest);
+
+        var result = moneyOperationService.getAllMyOperations(10, 0, OperationsSort.OPERATIONS_TYPE, true);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(2);
+        
+        assertThat(result.getContent())
+                .allMatch(operation ->
+                        (operation.toAccountId().equals(firstAccount.getId())) ||
+                                (operation.toAccountId().equals(secondAccount.getId())) &&
+                                        (operation.type().equals(OperationType.DEPOSIT))
+
+                );
     }
 
 
