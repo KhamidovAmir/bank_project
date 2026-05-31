@@ -29,6 +29,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 
@@ -186,7 +187,7 @@ public class MoneyOperationServiceIT {
     }
 
     @Test
-    void transfer_shouldThrowExceptionAndCreateMoneyOperation(){
+    void transfer_shouldThrowExceptionInsufficientFundsAndCreateMoneyOperation(){
 
         User firstUser = createUser();
         User secondUser = createUser();
@@ -225,6 +226,57 @@ public class MoneyOperationServiceIT {
         assertThat(firstAccount.getBalance()).isEqualByComparingTo(new BigDecimal("0.00"));
         assertThat(secondAccount.getBalance()).isEqualByComparingTo(new BigDecimal("0.00"));
 
+    }
+
+    @Test
+    void transfer_shouldCompleteFirstRequestAndRejectSecondRequestWithSameIdempotencyKey(){
+
+        User firstUser = createUser();
+        User secondUser = createUser();
+
+        Account firstAccount = createAccount(firstUser, Currency.RUB);
+        Account secondAccount = createAccount(secondUser, Currency.RUB);
+
+        firstAccount.deposit(new BigDecimal("20.00"));
+        firstAccount = accountRepository.save(firstAccount);
+
+        when(userService.getCurrentUser()).thenReturn(firstUser);
+
+        TransferRequest request = new TransferRequest(
+                firstAccount.getPublicId(),
+                secondAccount.getPublicId(),
+                new BigDecimal("10.00"),
+                "test"
+        );
+
+        String idempotencyKey = "transfer-" + UUID.randomUUID();
+
+        moneyOperationService.transfers(idempotencyKey, request);
+
+        assertThatThrownBy(() ->
+                moneyOperationService.transfers(idempotencyKey, request))
+                .isInstanceOf(RuntimeException.class);
+
+        firstAccount = accountRepository.findByPublicId(firstAccount.getPublicId()).orElseThrow();
+        secondAccount = accountRepository.findByPublicId(secondAccount.getPublicId()).orElseThrow();
+
+        MoneyOperation operation = moneyOperationRepository.findByIdempotencyKey(idempotencyKey).orElseThrow();
+
+        assertThat(operation).isNotNull();
+
+        assertThat(moneyOperationRepository.countByIdempotencyKey(idempotencyKey))
+                .isEqualTo(1);
+
+        assertThat(operation.getAmount()).isEqualByComparingTo(new BigDecimal("10.00"));
+
+        assertThat(operation.getFromAccountId()).isEqualTo(firstAccount.getId());
+        assertThat(operation.getToAccountId()).isEqualTo(secondAccount.getId());
+
+        assertThat(operation.getType()).isEqualTo(OperationType.TRANSFER);
+        assertThat(operation.getStatus()).isEqualTo(OperationStatus.COMPLETED);
+
+        assertThat(firstAccount.getBalance()).isEqualByComparingTo(new BigDecimal("10.00"));
+        assertThat(secondAccount.getBalance()).isEqualByComparingTo(new BigDecimal("10.00"));
     }
 
 

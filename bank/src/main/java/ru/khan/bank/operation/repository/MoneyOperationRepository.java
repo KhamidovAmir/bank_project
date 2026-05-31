@@ -16,4 +16,6 @@ public interface MoneyOperationRepository extends JpaRepository<MoneyOperation, 
     Page<MoneyOperation> findAllByFromAccountIdOrToAccountId(Long id, Long id1, Pageable pageable);
 
     Page<MoneyOperation> findAllByFromAccountIdInOrToAccountIdIn(List<Long> accountsId, List<Long> accountsId1, Pageable pageable);
+
+    Long countByIdempotencyKey(String idempotencyKey);
 }
