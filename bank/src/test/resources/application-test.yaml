@@ -1,0 +1,3 @@
+jwt:
+  secret: "very-very-very-very-very-very-very-very-good-secret"
+  expiration: 360000

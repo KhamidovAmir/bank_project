@@ -24,4 +24,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             WHERE a.owner.id = :ownerId
     """)
     List<Long> findIdsByOwnerId(Long ownerId);
+
+    Optional<Account> findByOwnerId(Long ownerId);
 }
