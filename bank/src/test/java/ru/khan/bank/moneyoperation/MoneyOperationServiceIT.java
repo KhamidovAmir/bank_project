@@ -180,7 +180,49 @@ public class MoneyOperationServiceIT {
         assertThat(firstAccount.getBalance()).isEqualByComparingTo(new BigDecimal("10.00"));
         assertThat(secondAccount.getBalance()).isEqualByComparingTo(new BigDecimal("10.00"));
     }
-    
+
+    @Test
+    void transfer_shouldThrowExceptionAndCreateMoneyOperation(){
+
+        User firstUser = createUser();
+        User secondUser = createUser();
+
+        Account firstAccount = createAccount(firstUser, Currency.RUB);
+        Account secondAccount = createAccount(secondUser, Currency.RUB);
+
+        when(userService.getCurrentUser()).thenReturn(firstUser);
+
+        TransferRequest request = new TransferRequest(
+                firstAccount.getPublicId(),
+                secondAccount.getPublicId(),
+                new BigDecimal("10.00"),
+                "test"
+        );
+
+        String idempotencyKey = "transfer-" + UUID.randomUUID();
+
+        moneyOperationService.transfers(idempotencyKey, request);
+
+        firstAccount = accountRepository.findByPublicId(firstAccount.getPublicId()).orElseThrow();
+        secondAccount = accountRepository.findByPublicId(secondAccount.getPublicId()).orElseThrow();
+
+        MoneyOperation operation = moneyOperationRepository.findByIdempotencyKey(idempotencyKey).orElseThrow();
+
+        assertThat(operation).isNotNull();
+
+        assertThat(operation.getAmount()).isEqualByComparingTo(new BigDecimal("10.00"));
+
+        assertThat(operation.getFromAccountId()).isEqualTo(firstAccount.getId());
+        assertThat(operation.getToAccountId()).isEqualTo(secondAccount.getId());
+
+        assertThat(operation.getType()).isEqualTo(OperationType.TRANSFER);
+        assertThat(operation.getStatus()).isEqualTo(OperationStatus.FAILED);
+
+        assertThat(firstAccount.getBalance()).isEqualByComparingTo(new BigDecimal("0.00"));
+        assertThat(secondAccount.getBalance()).isEqualByComparingTo(new BigDecimal("0.00"));
+
+    }
+
 
     private User createUser(){
         return userRepository.save(
