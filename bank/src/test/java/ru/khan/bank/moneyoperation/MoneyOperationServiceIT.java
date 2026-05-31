@@ -1,6 +1,5 @@
 package ru.khan.bank.moneyoperation;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,8 +58,8 @@ public class MoneyOperationServiceIT {
     @AfterEach
     void cleanDb() {
         moneyOperationRepository.deleteAll();
-        userRepository.deleteAll();
         accountRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
@@ -365,6 +364,35 @@ public class MoneyOperationServiceIT {
                 );
     }
 
+
+    @Test
+    void getMyOperationOnAccount_shouldReturnOperationForOneAccount(){
+        User user = createUser();
+
+        Account firstAccount = createAccount(user, Currency.RUB);
+        Account secondAccount = createAccount(user, Currency.RUB);
+
+        DepositRequest firstRequest = new DepositRequest(firstAccount.getPublicId(), new BigDecimal("50.00"), null);
+        DepositRequest secondRequest = new DepositRequest(secondAccount.getPublicId(), new BigDecimal("30.00"), null);
+
+        when(userService.getCurrentUser()).thenReturn(user);
+
+        String firstIdempotencyKey = "deposit-" + UUID.randomUUID();
+        String secondIdempotencyKey = "deposit-" + UUID.randomUUID();
+
+        moneyOperationService.deposit(firstIdempotencyKey, firstRequest);
+        moneyOperationService.deposit(secondIdempotencyKey, secondRequest);
+
+        var result = moneyOperationService.getMyOperationOnAccount(10,0,OperationsSort.OPERATIONS_TYPE, true, firstAccount.getPublicId());
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getTotalElements()).isEqualTo(1);
+
+        assertThat(result.getContent())
+                .allMatch(operation -> operation.toAccountId().equals(firstAccount.getId()));
+
+    }
 
     private User createUser(){
         return userRepository.save(
