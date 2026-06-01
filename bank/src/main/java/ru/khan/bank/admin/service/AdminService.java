@@ -72,6 +72,7 @@ public class AdminService {
         account.block();
     }
 
+    @Transactional
     public void blockUser(UUID publicUserId) {
         User user = userService.getCurrentUser();
         isAdmin(user);
@@ -80,6 +81,7 @@ public class AdminService {
         target.block();
     }
 
+    @Transactional
     public void unblockUser(UUID publicUserId) {
         User user = userService.getCurrentUser();
         isAdmin(user);
