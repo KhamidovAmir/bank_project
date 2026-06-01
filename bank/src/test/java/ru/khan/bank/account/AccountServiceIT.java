@@ -13,6 +13,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 import ru.khan.bank.account.dto.CreateAccountRequest;
 import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.account.entity.AccountSort;
+import ru.khan.bank.account.entity.AccountStatus;
 import ru.khan.bank.account.entity.Currency;
 import ru.khan.bank.account.repository.AccountRepository;
 import ru.khan.bank.account.service.AccountService;
@@ -119,6 +120,33 @@ public class AccountServiceIT {
         when(userService.getCurrentUser()).thenReturn(user);
 
         assertThatThrownBy(() -> accountService.getAccountByPublicId(accountForAnother.getPublicId()))
+                .isInstanceOf(RuntimeException.class);
+    }
+
+    @Test
+    void closeAccount_shouldCloseAccount(){
+        var user = createUser();
+        var account = createAccount(user, Currency.RUB);
+
+        when(userService.getCurrentUser()).thenReturn(user);
+
+        accountService.closeAccount(account.getPublicId());
+
+        var updatedAccount = accountRepository.findByPublicId(account.getPublicId()).orElseThrow();
+
+        assertThat(updatedAccount).isNotNull();
+        assertThat(updatedAccount.getAccountNumber()).isEqualTo(account.getAccountNumber());
+        assertThat(updatedAccount.getStatus()).isEqualTo(AccountStatus.CLOSED);
+    }
+    @Test
+    void closeAccount_shouldThrowExceptionIsNotYourAccount(){
+        var user = createUser();
+        var account = createAccount(user, Currency.RUB);
+
+        var anotherUser = createUser();
+        when(userService.getCurrentUser()).thenReturn(anotherUser);
+
+        assertThatThrownBy(() -> accountService.closeAccount(account.getPublicId()))
                 .isInstanceOf(RuntimeException.class);
     }
 
