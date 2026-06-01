@@ -24,6 +24,7 @@ import ru.khan.bank.user.service.UserService;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
@@ -93,6 +94,32 @@ public class AccountServiceIT {
                         a -> a.accountNumber().equals(accountForUser.getAccountNumber())
                 );
 
+    }
+
+    @Test
+    void getAccountByPublicId_shouldReturnAccount(){
+        var user = createUser();
+        var account = createAccount(user, Currency.RUB);
+
+        when(userService.getCurrentUser()).thenReturn(user);
+
+        var result = accountService.getAccount(account.getPublicId());
+
+        assertThat(result).isNotNull();
+        assertThat(result.getPublicId()).isEqualTo(account.getPublicId());
+    }
+
+    @Test
+    void getAccountByPublicId_shouldThrowExceptionIsNotYourAccount(){
+        var anotherUser = createUser();
+        var accountForAnother = createAccount(anotherUser, Currency.RUB);
+
+        var user = createUser();
+
+        when(userService.getCurrentUser()).thenReturn(user);
+
+        assertThatThrownBy(() -> accountService.getAccountByPublicId(accountForAnother.getPublicId()))
+                .isInstanceOf(RuntimeException.class);
     }
 
     private User createUser(){
