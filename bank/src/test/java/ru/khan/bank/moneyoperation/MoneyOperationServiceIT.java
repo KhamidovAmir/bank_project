@@ -204,6 +204,33 @@ public class MoneyOperationServiceIT {
                 .isNotBlank();
 
     }
+    @Test
+    void withdraw_shouldThrowExceptionAccountIsNotYour() {
+
+        User user = createUser();
+
+        Account account = createAccount(user, Currency.RUB);
+
+        User anotherUser = createUser();
+
+        when(userService.getCurrentUser()).thenReturn(anotherUser);
+
+        var request = new WithdrawRequest(
+                account.getPublicId(),
+                new BigDecimal("100.00"),
+                "test");
+
+        String idempotencyKey = "withdraw-" + UUID.randomUUID();
+
+        assertThatThrownBy(() -> moneyOperationService.withdraw(idempotencyKey, request))
+                .isInstanceOf(RuntimeException.class);
+
+        Account updateAccount = accountRepository.findByPublicId(account.getPublicId())
+                .orElseThrow();
+
+        assertThat(updateAccount.getBalance()).isEqualByComparingTo(new BigDecimal("0.00"));
+
+    }
 
     @Test
     void transfers_shouldTransferAccountBalanceAndCreateMoneyOperation() {
