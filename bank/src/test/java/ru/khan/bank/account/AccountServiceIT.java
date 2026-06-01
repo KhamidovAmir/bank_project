@@ -12,10 +12,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import ru.khan.bank.account.dto.CreateAccountRequest;
 import ru.khan.bank.account.entity.Account;
+import ru.khan.bank.account.entity.AccountSort;
 import ru.khan.bank.account.entity.Currency;
-import ru.khan.bank.account.mapper.AccountMapper;
 import ru.khan.bank.account.repository.AccountRepository;
-import ru.khan.bank.account.service.AccountNumberGenerator;
 import ru.khan.bank.account.service.AccountService;
 import ru.khan.bank.user.entity.User;
 import ru.khan.bank.user.entity.UserRole;
@@ -24,7 +23,7 @@ import ru.khan.bank.user.service.UserService;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
@@ -74,6 +73,28 @@ public class AccountServiceIT {
         assertThat(account.getOwner().getId()).isEqualTo(user.getId());
     }
 
+    @Test
+    void getMyAccounts_shouldReturnAccountsOnlyForCurrentUser(){
+        var anotherUser = createUser();
+        var user = createUser();
+
+        var accountForAnotherUser = createAccount(anotherUser, Currency.RUB);
+        var accountForUser = createAccount(user, Currency.RUB);
+
+        when(userService.getCurrentUser()).thenReturn(user);
+
+        var result = accountService.getMyAccounts(10, 0, AccountSort.CREATED_AT, true);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getTotalElements()).isEqualTo(1);
+
+        assertThat(result.getContent())
+                .allMatch(
+                        a -> a.accountNumber().equals(accountForUser.getAccountNumber())
+                );
+
+    }
+
     private User createUser(){
         return userRepository.save(new User(
                 UUID.randomUUID() + "@gmail.com",
@@ -81,6 +102,11 @@ public class AccountServiceIT {
                 "test",
                 "test",
                 UserRole.CUSTOMER
+        ));
+    }
+    private Account createAccount(User user, Currency currency){
+        return accountRepository.save(new Account(
+                user, UUID.randomUUID().toString(), currency
         ));
     }
 }
