@@ -103,6 +103,60 @@ public class MoneyOperationServiceIT {
         assertThat(operation.getIdempotencyKey())
                 .isNotBlank();
     }
+    @Test
+    void deposit_shouldThrowExceptionAccountNotActive() {
+
+        User user = createUser();
+
+        Account account = createAccount(user, Currency.RUB);
+        account.close();
+        accountRepository.save(account);
+
+        when(userService.getCurrentUser()).thenReturn(user);
+
+        DepositRequest request = new DepositRequest(
+                account.getPublicId(),
+                new BigDecimal("100.00"),
+                "test");
+
+        String idempotencyKey = "deposit-" + UUID.randomUUID();
+
+        assertThatThrownBy(() -> moneyOperationService.deposit(idempotencyKey, request))
+                .isInstanceOf(RuntimeException.class);
+
+        Account updateAccount = accountRepository.findByPublicId(account.getPublicId())
+                .orElseThrow();
+
+        assertThat(updateAccount.getBalance()).isEqualByComparingTo(new BigDecimal("0.00"));
+
+    }
+    @Test
+    void deposit_shouldThrowExceptionAccountIsNotYour() {
+
+        User user = createUser();
+
+        Account account = createAccount(user, Currency.RUB);
+
+        User anotherUser = createUser();
+
+        when(userService.getCurrentUser()).thenReturn(anotherUser);
+
+        DepositRequest request = new DepositRequest(
+                account.getPublicId(),
+                new BigDecimal("100.00"),
+                "test");
+
+        String idempotencyKey = "deposit-" + UUID.randomUUID();
+
+        assertThatThrownBy(() -> moneyOperationService.deposit(idempotencyKey, request))
+                .isInstanceOf(RuntimeException.class);
+
+        Account updateAccount = accountRepository.findByPublicId(account.getPublicId())
+                .orElseThrow();
+
+        assertThat(updateAccount.getBalance()).isEqualByComparingTo(new BigDecimal("0.00"));
+
+    }
 
     @Test
     void withdraw_shouldReduceAccountBalanceAndCreateMoneyOperation() {
