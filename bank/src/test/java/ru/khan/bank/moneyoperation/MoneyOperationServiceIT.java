@@ -465,8 +465,8 @@ public class MoneyOperationServiceIT {
 
         assertThat(result.getContent())
                 .allMatch(operation ->
-                        (operation.toAccountId().equals(firstAccount.getId())) ||
-                                (operation.toAccountId().equals(secondAccount.getId())) &&
+                        (operation.toAccountId().equals(firstAccount.getId()) ||
+                                operation.toAccountId().equals(secondAccount.getId())) &&
                                         (operation.type().equals(OperationType.DEPOSIT))
 
                 );
