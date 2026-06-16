@@ -15,6 +15,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import ru.khan.bank.account.dto.CreateAccountRequest;
+import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.account.entity.Currency;
 import ru.khan.bank.account.repository.AccountRepository;
 import ru.khan.bank.auth.dto.CreateUserRequest;
@@ -26,6 +27,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -70,6 +72,40 @@ public class AccountControllerIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    void getMyAccounts_shouldReturnIsOk() throws Exception {
+        String token = registerAndGetToken();
+
+        mockMvc.perform(post("/accounts/my")
+                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token)
+                .param("size", "20")
+                .param("page", "0")
+                .param("sort", "CREATED_AT")
+                .param("asc", "true"))
+                .andExpect(status().isOk());
+
+    }
+    @Test
+    void getMyAccounts_shouldReturnUnauthorizedWithoutToken() throws Exception {
+        mockMvc.perform(post("/accounts/my")
+                        .param("sort", "CREATED_AT"))
+                .andExpect(status().isForbidden());
+    }
+    @Test
+    void getMyAccounts_shouldReturnBadRequestWhenSortIsInvalid() throws Exception {
+        String token = registerAndGetToken();
+
+        mockMvc.perform(post("/accounts/my")
+                        .header("Authorization", "Bearer " + token)
+                        .param("sort", "WRONG_SORT"))
+                .andExpect(status().isInternalServerError());
+    }
+    @Test
+    void getAccount_shouldReturnIsOk() throws Exception {
+        String token = registerAndGetToken();
+
     }
 
     private String registerAndGetToken() throws Exception {

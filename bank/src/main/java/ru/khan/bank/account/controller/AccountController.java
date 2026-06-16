@@ -31,7 +31,7 @@ public class AccountController {
     @PostMapping("/my")
     public Page<AccountPageResponse> getMyAccounts(@RequestParam(value = "size", defaultValue = "20") Integer size,
                                                    @RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                   @RequestParam(value = "sort") AccountSort sort,
+                                                   @RequestParam(value = "sort", defaultValue = "CREATED_AT") AccountSort sort,
                                                    @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
         return accountService.getMyAccounts(size, page, sort, asc);
     }
