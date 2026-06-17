@@ -1,7 +1,7 @@
 package ru.khan.bank.operation.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.khan.bank.operation.dto.DepositRequest;
@@ -15,13 +15,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/operations")
+@RequiredArgsConstructor
 public class MoneyOperationController {
 
-    private final MoneyOperationService moneyOperationService;
-
-    public MoneyOperationController(MoneyOperationService moneyOperationService) {
-        this.moneyOperationService = moneyOperationService;
-    }
+    MoneyOperationService moneyOperationService;
 
     @PostMapping("/deposit")
     public ResponseEntity<Void> deposit(@RequestHeader("Idempotency-Key") String idempotencyKey,

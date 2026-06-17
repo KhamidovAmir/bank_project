@@ -322,7 +322,8 @@ public class MoneyOperationServiceIT {
 
         String idempotencyKey = "transfer-" + UUID.randomUUID();
 
-        moneyOperationService.transfers(idempotencyKey, request);
+        assertThatThrownBy(() -> moneyOperationService.transfers(idempotencyKey, request))
+                .isInstanceOf(RuntimeException.class);
 
         firstAccount = accountRepository.findByPublicId(firstAccount.getPublicId()).orElseThrow();
         secondAccount = accountRepository.findByPublicId(secondAccount.getPublicId()).orElseThrow();
