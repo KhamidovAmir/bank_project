@@ -9,10 +9,7 @@ import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.account.service.AccountService;
 import ru.khan.bank.admin.dto.OperationsPageableResponse;
 import ru.khan.bank.operation.MoneyOperationMapper;
-import ru.khan.bank.operation.dto.DepositRequest;
-import ru.khan.bank.operation.dto.MoneyOperationsResponse;
-import ru.khan.bank.operation.dto.TransferRequest;
-import ru.khan.bank.operation.dto.WithdrawRequest;
+import ru.khan.bank.operation.dto.*;
 import ru.khan.bank.operation.entity.OperationsSort;
 import ru.khan.bank.operation.repository.MoneyOperationRepository;
 import ru.khan.bank.user.entity.User;
@@ -32,29 +29,53 @@ public class MoneyOperationService {
     private final MoneyOperationMapper moneyOperationMapper;
     private final AccountService accountService;
 
-    public void deposit(String idempotencyKey, DepositRequest request){
-
+    public OperationResponse deposit(String idempotencyKey, DepositRequest request) {
         Long operationId = moneyOperationCreator.createDeposit(idempotencyKey, request);
 
-        moneyOperationExecutor.executeDeposit(operationId);
+        try {
+            moneyOperationExecutor.executeDeposit(operationId);
+        } catch (Exception e) {
+            var operation = moneyOperationRepository.findById(operationId).orElse(null);
 
-        findAndCheckStatus(operationId);
+            if (operation != null) {
+                operation.fail(e.getMessage());
+                moneyOperationRepository.save(operation);
+            }
+        }
+        return checkStatus(idempotencyKey);
     }
-    public void withdraw(String idempotencyKey, WithdrawRequest request){
 
+    public OperationResponse withdraw(String idempotencyKey, WithdrawRequest request){
         Long operationId = moneyOperationCreator.createWithdraw(idempotencyKey, request);
+        try {
+            moneyOperationExecutor.executeWithdraw(operationId);
+        } catch (Exception e) {
+            var operation = moneyOperationRepository.findById(operationId).orElse(null);
 
-        moneyOperationExecutor.executeWithdraw(operationId);
+            if (operation != null) {
+                operation.fail(e.getMessage());
+                moneyOperationRepository.save(operation);
+            }
+        }
 
-        findAndCheckStatus(operationId);
+        return checkStatus(idempotencyKey);
     }
 
-    public void transfers(String idempotencyKey, TransferRequest request){
+    public OperationResponse transfers(String idempotencyKey, TransferRequest request){
         Long operationId = moneyOperationCreator.createTransfers(idempotencyKey, request);
+        try {
+            moneyOperationExecutor.executeTransfers(operationId);
 
-        moneyOperationExecutor.executeTransfers(operationId);
+        } catch (Exception e) {
+            var operation = moneyOperationRepository.findById(operationId).orElse(null);
 
-        findAndCheckStatus(operationId);
+            if (operation != null) {
+                operation.fail(e.getMessage());
+                moneyOperationRepository.save(operation);
+            }
+        }
+
+        return checkStatus(idempotencyKey);
     }
 
     public Page<MoneyOperationsResponse> getAllMyOperations(Integer size, Integer page, OperationsSort sort, Boolean asc) {
@@ -122,15 +143,14 @@ public class MoneyOperationService {
                 );
     }
 
-    private void findAndCheckStatus(Long operationId){
-        var operation = moneyOperationRepository.findById(operationId)
+    private OperationResponse checkStatus(String idempotencyKey){
+        var operation = moneyOperationRepository.findByIdempotencyKey(idempotencyKey)
                 .orElseThrow(() -> new RuntimeException("Operation not found"));
 
-        if (operation.isCancelled()){
-            throw new RuntimeException("Operation cancelled");
-        } else if (operation.isFailed()){
+        if (operation.isFailed() || operation.isCancelled())
             throw new RuntimeException("Operation failed");
-        }
+
+        return new OperationResponse(operation.getStatus());
     }
 
 }

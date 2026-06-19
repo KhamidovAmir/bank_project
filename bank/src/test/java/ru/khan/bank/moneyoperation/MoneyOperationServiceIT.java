@@ -346,7 +346,7 @@ public class MoneyOperationServiceIT {
     }
 
     @Test
-    void transfer_shouldCompleteFirstRequestAndRejectSecondRequestWithSameIdempotencyKey(){
+    void transfer_shouldCompleteFirstRequestAndDoNothingForSecondRequestWithTheSameIdempotencyKey(){
 
         User firstUser = createUser();
         User secondUser = createUser();
@@ -370,9 +370,7 @@ public class MoneyOperationServiceIT {
 
         moneyOperationService.transfers(idempotencyKey, request);
 
-        assertThatThrownBy(() ->
-                moneyOperationService.transfers(idempotencyKey, request))
-                .isInstanceOf(RuntimeException.class);
+        moneyOperationService.transfers(idempotencyKey, request);
 
         firstAccount = accountRepository.findByPublicId(firstAccount.getPublicId()).orElseThrow();
         secondAccount = accountRepository.findByPublicId(secondAccount.getPublicId()).orElseThrow();

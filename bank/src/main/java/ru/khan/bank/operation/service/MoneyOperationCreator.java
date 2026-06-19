@@ -1,28 +1,23 @@
 package ru.khan.bank.operation.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.khan.bank.account.entity.Account;
+import ru.khan.bank.account.entity.Currency;
 import ru.khan.bank.account.service.AccountService;
-import ru.khan.bank.admin.dto.OperationsPageableResponse;
-import ru.khan.bank.operation.MoneyOperationMapper;
 import ru.khan.bank.operation.dto.DepositRequest;
-import ru.khan.bank.operation.dto.MoneyOperationsResponse;
 import ru.khan.bank.operation.dto.TransferRequest;
 import ru.khan.bank.operation.dto.WithdrawRequest;
 import ru.khan.bank.operation.entity.MoneyOperation;
-import ru.khan.bank.operation.entity.OperationsSort;
+import ru.khan.bank.operation.entity.OperationType;
 import ru.khan.bank.operation.repository.MoneyOperationRepository;
 import ru.khan.bank.user.entity.User;
 import ru.khan.bank.user.service.UserService;
 
-import java.util.List;
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -32,21 +27,21 @@ class MoneyOperationCreator {
     private final MoneyOperationRepository moneyOperationRepository;
     private final UserService userService;
     private final AccountService accountService;
-    private final MoneyOperationMapper moneyOperationMapper;
 
     @Transactional
     public Long createDeposit(String idempotencyKey, DepositRequest request) {
-        ensureIdempotencyKeyIsNotUsed(idempotencyKey);
 
         User user = userService.getCurrentUser();
 
         Account account = accountService.getAccount(request.accountPublicId());
 
-        if (!account.ensureIsOwner(user.getId()))
+        if (!account.ensureIsOwner(user.getId())) {
             throw new RuntimeException("You can't deposit not your account");
+        }
 
-        if (!account.ensureActive())
+        if (!account.ensureActive()) {
             throw new RuntimeException("This account is not active");
+        }
 
         MoneyOperation operation = MoneyOperation.deposit(
                 generateOperationNumber(),
@@ -57,14 +52,24 @@ class MoneyOperationCreator {
                 idempotencyKey
         );
 
-        var saved = moneyOperationRepository.save(operation);
+        if (ensureIdempotencyKeyIsNotContains(idempotencyKey) != -1) {
+            return ensureSameOperation(operation,
+                    OperationType.DEPOSIT,
+                    request.amount(),
+                    Currency.RUB,
+                    null,
+                    account.getId());
+        }
 
-        return saved.getId();
+        try {
+            return moneyOperationRepository.save(operation).getId();
+        } catch (DataIntegrityViolationException e) {
+            throw new RuntimeException("Try operation after some time");
+        }
     }
 
     @Transactional
     public Long createWithdraw(String idempotencyKey, WithdrawRequest request) {
-        ensureIdempotencyKeyIsNotUsed(idempotencyKey);
 
         User user = userService.getCurrentUser();
         Account account = accountService.getAccount(request.accountPublicId());
@@ -84,13 +89,15 @@ class MoneyOperationCreator {
                 idempotencyKey
         );
 
-        var saved = moneyOperationRepository.save(operation);
-        return saved.getId();
+        try {
+            return moneyOperationRepository.save(operation).getId();
+        } catch (DataIntegrityViolationException e) {
+            throw new RuntimeException("Try operation after some time");
+        }
     }
 
     @Transactional
     public Long createTransfers(String idempotencyKey, TransferRequest request) {
-        ensureIdempotencyKeyIsNotUsed(idempotencyKey);
 
         User user = userService.getCurrentUser();
 
@@ -118,35 +125,37 @@ class MoneyOperationCreator {
                 idempotencyKey
         );
 
-        var saved = moneyOperationRepository.save(operation);
-        return saved.getId();
+        try {
+            return moneyOperationRepository.save(operation).getId();
+        } catch (DataIntegrityViolationException e) {
+            throw new RuntimeException("Try operation after some time");
+        }
     }
 
     private String generateOperationNumber() {
         return "OP-000" + UUID.randomUUID();
     }
 
-    private void ensureIdempotencyKeyIsNotUsed(String idempotencyKey) {
+    private Long ensureIdempotencyKeyIsNotContains(String idempotencyKey) {
+        var operation = moneyOperationRepository.findByIdempotencyKey(idempotencyKey).orElse(null);
+        if (operation == null) return -1L;
 
-        Optional<MoneyOperation> existingOperation = moneyOperationRepository.findByIdempotencyKey(idempotencyKey);
+        return operation.getId();
+    }
 
-        existingOperation.ifPresent(operation -> {
-            if (operation.isPending()) {
-                throw new RuntimeException("Operation is already processing");
-            }
+    private Long ensureSameOperation(MoneyOperation operation, OperationType type,
+                                     BigDecimal amount, Currency currency,
+                                     Long idFrom, Long idTo) {
+        boolean same = operation.getType() == type
+                && operation.getAmount().compareTo(amount) == 0
+                && operation.getCurrency() == currency
+                && Objects.equals(operation.getFromAccountId(), idFrom)
+                && Objects.equals(operation.getToAccountId(), idTo);
 
-            if (operation.isCompleted()) {
-                throw new RuntimeException("Operation was already completed");
-            }
+        if (!same)
+            throw new RuntimeException("Idempotency key was already used");
 
-            if (operation.isFailed()) {
-                throw new RuntimeException("Operation was already failed");
-            }
-
-            if (operation.isCancelled()) {
-                throw new RuntimeException("Operation was already cancelled");
-            }
-        });
+        return operation.getId();
     }
 }
 

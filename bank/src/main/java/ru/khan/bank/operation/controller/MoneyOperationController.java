@@ -2,12 +2,8 @@ package ru.khan.bank.operation.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.khan.bank.operation.dto.DepositRequest;
-import ru.khan.bank.operation.dto.MoneyOperationsResponse;
-import ru.khan.bank.operation.dto.TransferRequest;
-import ru.khan.bank.operation.dto.WithdrawRequest;
+import ru.khan.bank.operation.dto.*;
 import ru.khan.bank.operation.entity.OperationsSort;
 import ru.khan.bank.operation.service.MoneyOperationService;
 
@@ -21,22 +17,21 @@ public class MoneyOperationController {
     MoneyOperationService moneyOperationService;
 
     @PostMapping("/deposit")
-    public ResponseEntity<Void> deposit(@RequestHeader("Idempotency-Key") String idempotencyKey,
-                                        @RequestBody DepositRequest request) {
-        moneyOperationService.deposit(idempotencyKey, request);
-        return ResponseEntity.status(201).build();
+    public OperationResponse deposit(@RequestHeader("Idempotency-Key") String idempotencyKey,
+                                     @RequestBody DepositRequest request) {
+
+        return moneyOperationService.deposit(idempotencyKey, request);
     }
     @PostMapping("/withdraw")
-    public ResponseEntity<Void> withdraw(@RequestHeader("Idempotency-Key") String idempotencyKey,
+    public OperationResponse withdraw(@RequestHeader("Idempotency-Key") String idempotencyKey,
                                          @RequestBody WithdrawRequest request){
-        moneyOperationService.withdraw(idempotencyKey, request);
-        return ResponseEntity.status(201).build();
+
+        return moneyOperationService.withdraw(idempotencyKey, request);
     }
     @PostMapping("/transfers")
-    public ResponseEntity<Void> transfers(@RequestHeader("Idempotency-Key") String idempotencyKey,
+    public OperationResponse transfers(@RequestHeader("Idempotency-Key") String idempotencyKey,
                                          @RequestBody TransferRequest request){
-        moneyOperationService.transfers(idempotencyKey, request);
-        return ResponseEntity.status(201).build();
+        return moneyOperationService.transfers(idempotencyKey, request);
     }
     @GetMapping
     public Page<MoneyOperationsResponse> getOperations(@RequestParam(value = "size", defaultValue = "20") Integer size,

@@ -25,12 +25,9 @@ class MoneyOperationExecutor {
         Account account = accountRepository.findById(operation.getToAccountId())
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 
-        try {
-            account.deposit(operation.getAmount());
-            operation.complete();
-        } catch(Exception e) {
-            operation.fail(e.getMessage());
-        }
+        account.deposit(operation.getAmount());
+        operation.complete();
+
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -42,12 +39,8 @@ class MoneyOperationExecutor {
         Account account = accountRepository.findById(operation.getFromAccountId())
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 
-        try {
-            account.withdraw(operation.getAmount());
-            operation.complete();
-        } catch (RuntimeException e) {
-            operation.fail(e.getMessage());
-        }
+        account.withdraw(operation.getAmount());
+        operation.complete();
     }
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void executeTransfers(Long operationId) {
@@ -61,13 +54,9 @@ class MoneyOperationExecutor {
         Account from = accountRepository.findById(operation.getFromAccountId())
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 
-        try {
-            from.withdraw(operation.getAmount());
-            to.deposit(operation.getAmount());
-            operation.complete();
-        } catch (RuntimeException e) {
-            operation.fail(e.getMessage());
-        }
+        from.withdraw(operation.getAmount());
+        to.deposit(operation.getAmount());
+        operation.complete();
     }
 
 }
