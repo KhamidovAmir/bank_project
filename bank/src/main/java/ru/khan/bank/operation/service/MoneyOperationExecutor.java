@@ -22,6 +22,8 @@ class MoneyOperationExecutor {
         MoneyOperation operation = moneyOperationRepository.findById(operationId)
                 .orElseThrow(() -> new RuntimeException("Money operation not found"));
 
+        if (!operation.isPending()) return;
+
         Account account = accountRepository.findById(operation.getToAccountId())
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 
@@ -36,6 +38,8 @@ class MoneyOperationExecutor {
         MoneyOperation operation = moneyOperationRepository.findById(operationId)
                 .orElseThrow(() -> new RuntimeException("Money operation not found"));
 
+        if (!operation.isPending()) return;
+
         Account account = accountRepository.findById(operation.getFromAccountId())
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 
@@ -47,6 +51,8 @@ class MoneyOperationExecutor {
 
         MoneyOperation operation = moneyOperationRepository.findById(operationId)
                 .orElseThrow(() -> new RuntimeException("Money operation not found"));
+
+        if (!operation.isPending()) return;
 
         Account to = accountRepository.findById(operation.getToAccountId())
                 .orElseThrow(() -> new RuntimeException("Account not found"));

@@ -18,6 +18,7 @@ import ru.khan.bank.user.service.UserService;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -43,6 +44,18 @@ class MoneyOperationCreator {
             throw new RuntimeException("This account is not active");
         }
 
+        Optional<MoneyOperation> existing = moneyOperationRepository
+                .findByIdempotencyKey(idempotencyKey);
+        if (existing.isPresent()) {
+            ensureSameOperation(existing.get(),
+                    OperationType.DEPOSIT,
+                    request.amount(),
+                    account.getCurrency(),
+                    null,
+                    account.getId());
+            return existing.get().getId();
+        }
+
         MoneyOperation operation = MoneyOperation.deposit(
                 generateOperationNumber(),
                 account.getId(),
@@ -52,19 +65,17 @@ class MoneyOperationCreator {
                 idempotencyKey
         );
 
-        if (ensureIdempotencyKeyIsNotContains(idempotencyKey) != -1) {
-            return ensureSameOperation(operation,
-                    OperationType.DEPOSIT,
-                    request.amount(),
-                    Currency.RUB,
-                    null,
-                    account.getId());
-        }
 
         try {
             return moneyOperationRepository.save(operation).getId();
         } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Try operation after some time");
+            MoneyOperation concurrent = moneyOperationRepository
+                    .findByIdempotencyKey(idempotencyKey)
+                    .orElseThrow(() -> e);
+            ensureSameOperation(concurrent, OperationType.DEPOSIT,
+                    request.amount(), account.getCurrency(),
+                    null, account.getId());
+            return concurrent.getId();
         }
     }
 
@@ -80,6 +91,19 @@ class MoneyOperationCreator {
         if (!account.ensureActive())
             throw new RuntimeException("This account is not active");
 
+        Optional<MoneyOperation> existing = moneyOperationRepository
+                .findByIdempotencyKey(idempotencyKey);
+        if (existing.isPresent()) {
+            ensureSameOperation(existing.get(),
+                    OperationType.WITHDRAW,
+                    request.amount(),
+                    account.getCurrency(),
+                    account.getId(),
+                    null);
+
+            return existing.get().getId();
+        }
+
         MoneyOperation operation = MoneyOperation.withdraw(
                 generateOperationNumber(),
                 account.getId(),
@@ -92,7 +116,13 @@ class MoneyOperationCreator {
         try {
             return moneyOperationRepository.save(operation).getId();
         } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Try operation after some time");
+            MoneyOperation concurrent = moneyOperationRepository
+                    .findByIdempotencyKey(idempotencyKey)
+                    .orElseThrow(() -> e);
+            ensureSameOperation(concurrent, OperationType.WITHDRAW,
+                    request.amount(), account.getCurrency(),
+                    account.getId(), null);
+            return concurrent.getId();
         }
     }
 
@@ -115,6 +145,19 @@ class MoneyOperationCreator {
         if (from.getCurrency() != to.getCurrency())
             throw new RuntimeException("Currencies are not equal");
 
+        Optional<MoneyOperation> existing = moneyOperationRepository
+                .findByIdempotencyKey(idempotencyKey);
+        if (existing.isPresent()) {
+            ensureSameOperation(existing.get(),
+                    OperationType.TRANSFER,
+                    request.amount(),
+                    to.getCurrency(),
+                    from.getId(),
+                    to.getId());
+
+            return existing.get().getId();
+        }
+
         MoneyOperation operation = MoneyOperation.transfer(
                 generateOperationNumber(),
                 from.getId(),
@@ -128,7 +171,13 @@ class MoneyOperationCreator {
         try {
             return moneyOperationRepository.save(operation).getId();
         } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Try operation after some time");
+            MoneyOperation concurrent = moneyOperationRepository
+                    .findByIdempotencyKey(idempotencyKey)
+                    .orElseThrow(() -> e);
+            ensureSameOperation(concurrent, OperationType.TRANSFER,
+                    request.amount(), to.getCurrency(),
+                    from.getId(), to.getId());
+            return concurrent.getId();
         }
     }
 
@@ -136,14 +185,7 @@ class MoneyOperationCreator {
         return "OP-000" + UUID.randomUUID();
     }
 
-    private Long ensureIdempotencyKeyIsNotContains(String idempotencyKey) {
-        var operation = moneyOperationRepository.findByIdempotencyKey(idempotencyKey).orElse(null);
-        if (operation == null) return -1L;
-
-        return operation.getId();
-    }
-
-    private Long ensureSameOperation(MoneyOperation operation, OperationType type,
+    private void ensureSameOperation(MoneyOperation operation, OperationType type,
                                      BigDecimal amount, Currency currency,
                                      Long idFrom, Long idTo) {
         boolean same = operation.getType() == type
@@ -154,8 +196,6 @@ class MoneyOperationCreator {
 
         if (!same)
             throw new RuntimeException("Idempotency key was already used");
-
-        return operation.getId();
     }
 }
 
