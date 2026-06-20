@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import ru.khan.bank.account.entity.Currency;
+import ru.khan.bank.common.exception.exceptions.BadRequestException;
+import ru.khan.bank.common.exception.exceptions.ConflictException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -164,7 +166,6 @@ public class MoneyOperation {
         if (normalizedReason == null) {
             throw new IllegalArgumentException("Failure reason is required");
         }
-
         this.status = OperationStatus.FAILED;
         this.failureReason = normalizedReason;
         this.completedAt = LocalDateTime.now();
@@ -195,45 +196,45 @@ public class MoneyOperation {
 
     private void ensurePending() {
         if (status != OperationStatus.PENDING) {
-            throw new IllegalStateException("Only pending operation can be changed");
+            throw new ConflictException("Only pending operation can be changed");
         }
     }
 
     private void validateAccounts() {
         if (type == OperationType.DEPOSIT) {
             if (fromAccountId != null) {
-                throw new IllegalArgumentException("Deposit must not have fromAccountId");
+                throw new BadRequestException("Deposit must not have fromAccountId");
             }
 
             if (toAccountId == null) {
-                throw new IllegalArgumentException("Deposit requires toAccountId");
+                throw new BadRequestException("Deposit requires toAccountId");
             }
         }
 
         if (type == OperationType.WITHDRAW) {
             if (fromAccountId == null) {
-                throw new IllegalArgumentException("Withdraw requires fromAccountId");
+                throw new BadRequestException("Withdraw requires fromAccountId");
             }
 
             if (toAccountId != null) {
-                throw new IllegalArgumentException("Withdraw must not have toAccountId");
+                throw new BadRequestException("Withdraw must not have toAccountId");
             }
         }
 
         if (type == OperationType.TRANSFER) {
             if (fromAccountId == null || toAccountId == null) {
-                throw new IllegalArgumentException("Transfer requires both accounts");
+                throw new BadRequestException("Transfer requires both accounts");
             }
 
             if (fromAccountId.equals(toAccountId)) {
-                throw new IllegalArgumentException("Transfer between same account is not allowed");
+                throw new BadRequestException("Transfer between same account is not allowed");
             }
         }
     }
 
     private static OperationType requireType(OperationType type) {
         if (type == null) {
-            throw new IllegalArgumentException("Operation type is required");
+            throw new BadRequestException("Operation type is required");
         }
 
         return type;
@@ -241,7 +242,7 @@ public class MoneyOperation {
 
     private static Currency requireCurrency(Currency currency) {
         if (currency == null) {
-            throw new IllegalArgumentException("Currency is required");
+            throw new BadRequestException("Currency is required");
         }
 
         return currency;
@@ -249,11 +250,11 @@ public class MoneyOperation {
 
     private static BigDecimal requirePositiveAmount(BigDecimal amount) {
         if (amount == null) {
-            throw new IllegalArgumentException("Amount is required");
+            throw new BadRequestException("Amount is required");
         }
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount must be positive");
+            throw new BadRequestException("Amount must be positive");
         }
 
         return amount;
@@ -261,7 +262,7 @@ public class MoneyOperation {
 
     private static Long requireAccountId(Long accountId, String message) {
         if (accountId == null) {
-            throw new IllegalArgumentException(message);
+            throw new BadRequestException(message);
         }
 
         return accountId;

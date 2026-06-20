@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import ru.khan.bank.common.exception.exceptions.BadRequestException;
+import ru.khan.bank.common.exception.exceptions.ConflictException;
 import ru.khan.bank.user.entity.User;
 
 import java.math.BigDecimal;
@@ -53,13 +55,13 @@ public class Account {
 
     public Account(User owner, String accountNumber, Currency currency) {
         if (owner == null) {
-            throw new RuntimeException("Owner is required");
+            throw new BadRequestException("Owner is required");
         }
         if (accountNumber == null || accountNumber.isBlank()) {
-            throw new RuntimeException("Account number is required");
+            throw new BadRequestException("Account number is required");
         }
         if (currency == null) {
-            throw new RuntimeException("Currency is required");
+            throw new BadRequestException("Currency is required");
         }
 
         this.publicId = UUID.randomUUID();
@@ -82,7 +84,7 @@ public class Account {
         validatePositiveAmount(amount);
 
         if (this.balance.compareTo(amount) < 0) {
-            throw new RuntimeException("Insufficient funds");
+            throw new BadRequestException("Insufficient funds");
         }
 
         this.balance = this.balance.subtract(amount);
@@ -98,7 +100,7 @@ public class Account {
 
     public void close() {
         if (this.balance.compareTo(BigDecimal.ZERO) != 0) {
-            throw new IllegalStateException("Account with non-zero balance cannot be closed");
+            throw new ConflictException("Account with non-zero balance cannot be closed");
         }
 
         changeStatus(AccountStatus.CLOSED);
@@ -124,7 +126,7 @@ public class Account {
                         (this.status == AccountStatus.BLOCKED && newStatus == AccountStatus.CLOSED);
 
         if (!validTransition) {
-            throw new IllegalStateException(
+            throw new ConflictException(
                     "Invalid account status transition: " + this.status + " -> " + newStatus
             );
         }
@@ -132,17 +134,17 @@ public class Account {
 
     private void validateActive() {
         if (this.status != AccountStatus.ACTIVE) {
-            throw new IllegalStateException("Operation is allowed only for active account");
+            throw new ConflictException("Operation is allowed only for active account");
         }
     }
 
     private void validatePositiveAmount(BigDecimal amount) {
         if (amount == null) {
-            throw new IllegalArgumentException("Amount is required");
+            throw new BadRequestException("Amount is required");
         }
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount must be positive");
+            throw new BadRequestException("Amount must be positive");
         }
     }
 

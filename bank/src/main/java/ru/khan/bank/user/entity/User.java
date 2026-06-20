@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import ru.khan.bank.common.exception.exceptions.ConflictException;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -51,7 +52,7 @@ public class User {
 
     public void promoteToAdmin() {
         if (this.status == UserStatus.DELETED) {
-            throw new IllegalStateException("Deleted user cannot become admin");
+            throw new ConflictException("Deleted user cannot become admin");
         }
 
         this.role = UserRole.ADMIN;
@@ -103,7 +104,7 @@ public class User {
                         (status == UserStatus.BLOCKED && newStatus == UserStatus.DELETED);
 
         if (!validTransition) {
-            throw new IllegalStateException(
+            throw new ConflictException(
                     "Invalid status transition: " + status + " -> " + newStatus
             );
         }

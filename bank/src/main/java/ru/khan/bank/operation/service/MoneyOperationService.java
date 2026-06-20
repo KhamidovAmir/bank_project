@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.account.service.AccountService;
 import ru.khan.bank.admin.dto.OperationsPageableResponse;
+import ru.khan.bank.common.exception.exceptions.AccessDeniedException;
+import ru.khan.bank.common.exception.exceptions.ConflictException;
+import ru.khan.bank.common.exception.exceptions.NotFoundException;
 import ru.khan.bank.operation.MoneyOperationMapper;
 import ru.khan.bank.operation.dto.*;
 import ru.khan.bank.operation.entity.OperationsSort;
@@ -85,8 +88,7 @@ public class MoneyOperationService {
         List<Long> accountsId = accountService.getAllMyAccounts(user.getId());
 
         if (accountsId.isEmpty())
-            throw new RuntimeException("Your accounts not found");
-
+            throw new NotFoundException("Your accounts not found");
         return moneyOperationRepository.findAllByFromAccountIdInOrToAccountIdIn(accountsId, accountsId, pageable)
                 .map(operation -> moneyOperationMapper.toMoneyOperationsResponse(
                         operation.getPublicId(),
@@ -108,11 +110,10 @@ public class MoneyOperationService {
         Account account = accountService.getAccount(accountPublicId);
 
         if (!account.ensureIsOwner(user.getId()))
-            throw new RuntimeException("You don't have access to perform this action");
-
+            throw new AccessDeniedException("You don't have access to perform this action");
         Pageable pageable = PageRequest.of(page, size, sort.toSort(asc));
 
-        return moneyOperationRepository.findAllByFromAccountIdOrToAccountId(user.getId(), user.getId(), pageable)
+        return moneyOperationRepository.findAllByFromAccountIdOrToAccountId(account.getId(), account.getId(), pageable)
                 .map(operation -> moneyOperationMapper.toMoneyOperationsResponse(
                         operation.getPublicId(),
                         operation.getOperationNumber(),
@@ -145,10 +146,10 @@ public class MoneyOperationService {
 
     private OperationResponse checkStatus(String idempotencyKey){
         var operation = moneyOperationRepository.findByIdempotencyKey(idempotencyKey)
-                .orElseThrow(() -> new RuntimeException("Operation not found"));
+                .orElseThrow(() -> new NotFoundException("Operation not found"));
 
         if (operation.isFailed() || operation.isCancelled())
-            throw new RuntimeException("Operation failed");
+            throw new ConflictException("Operation failed");
 
         return new OperationResponse(operation.getStatus());
     }

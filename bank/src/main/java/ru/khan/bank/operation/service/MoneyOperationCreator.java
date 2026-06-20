@@ -7,6 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.account.entity.Currency;
 import ru.khan.bank.account.service.AccountService;
+import ru.khan.bank.common.exception.exceptions.AccessDeniedException;
+import ru.khan.bank.common.exception.exceptions.BadRequestException;
+import ru.khan.bank.common.exception.exceptions.ConflictException;
+import ru.khan.bank.common.exception.exceptions.IdempotencyConflictException;
 import ru.khan.bank.operation.dto.DepositRequest;
 import ru.khan.bank.operation.dto.TransferRequest;
 import ru.khan.bank.operation.dto.WithdrawRequest;
@@ -37,11 +41,11 @@ class MoneyOperationCreator {
         Account account = accountService.getAccount(request.accountPublicId());
 
         if (!account.ensureIsOwner(user.getId())) {
-            throw new RuntimeException("You can't deposit not your account");
+            throw new AccessDeniedException("You can't deposit not your account");
         }
 
         if (!account.ensureActive()) {
-            throw new RuntimeException("This account is not active");
+            throw new ConflictException("This account is not active");
         }
 
         Optional<MoneyOperation> existing = moneyOperationRepository
@@ -86,10 +90,10 @@ class MoneyOperationCreator {
         Account account = accountService.getAccount(request.accountPublicId());
 
         if (!account.ensureIsOwner(user.getId()))
-            throw new RuntimeException("You don't have access to perform this action");
+            throw new AccessDeniedException("You don't have access to perform this action");
 
         if (!account.ensureActive())
-            throw new RuntimeException("This account is not active");
+            throw new ConflictException("This account is not active");
 
         Optional<MoneyOperation> existing = moneyOperationRepository
                 .findByIdempotencyKey(idempotencyKey);
@@ -135,23 +139,24 @@ class MoneyOperationCreator {
         Account to = accountService.getAccount(request.accountPublicIdTo());
 
         if (!from.ensureIsOwner(user.getId()))
-            throw new RuntimeException("You don't have access to perform this action");
+            throw new AccessDeniedException("You don't have access to perform this action");
         if (!from.ensureActive())
-            throw new RuntimeException("Your account is not active");
+            throw new ConflictException("Your account is not active");
         if (!to.ensureActive())
-            throw new RuntimeException("Account you try transfer is not active");
+            throw new ConflictException("Account you try transfer is not active");
         if (from.getId().equals(to.getId()))
-            throw new RuntimeException("You try transfer the same account");
+            throw new BadRequestException("You try transfer the same account");
         if (from.getCurrency() != to.getCurrency())
-            throw new RuntimeException("Currencies are not equal");
+            throw new ConflictException("Currencies are not equal");
 
         Optional<MoneyOperation> existing = moneyOperationRepository
                 .findByIdempotencyKey(idempotencyKey);
+
         if (existing.isPresent()) {
             ensureSameOperation(existing.get(),
                     OperationType.TRANSFER,
                     request.amount(),
-                    to.getCurrency(),
+                    from.getCurrency(),
                     from.getId(),
                     to.getId());
 
@@ -195,7 +200,7 @@ class MoneyOperationCreator {
                 && Objects.equals(operation.getToAccountId(), idTo);
 
         if (!same)
-            throw new RuntimeException("Idempotency key was already used");
+            throw new IdempotencyConflictException("Idempotency key was already used");
     }
 }
 

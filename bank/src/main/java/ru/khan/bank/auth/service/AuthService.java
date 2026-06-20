@@ -3,14 +3,12 @@ package ru.khan.bank.auth.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.khan.bank.auth.dto.CreateUserRequest;
-import ru.khan.bank.auth.dto.JwtUser;
 import ru.khan.bank.auth.dto.LoginRequest;
 import ru.khan.bank.auth.dto.TokenResponse;
-import ru.khan.bank.user.UserMapper;
+import ru.khan.bank.common.exception.exceptions.BadRequestException;
+import ru.khan.bank.common.exception.exceptions.ConflictException;
 import ru.khan.bank.user.dto.CreateUserCommand;
-import ru.khan.bank.user.dto.UserProfileResponse;
 import ru.khan.bank.user.entity.User;
-import ru.khan.bank.user.repository.UserRepository;
 import ru.khan.bank.user.service.UserService;
 
 @Service
@@ -49,10 +47,10 @@ public class AuthService {
         User user = userService.getUserByEmailOrThrow(request.email());
 
         if(!passwordMatch(request.password(), user))
-            throw new RuntimeException("Invalid email or password");
+            throw new BadRequestException("Invalid email or password");
 
         if (!userService.isActive(user))
-            throw new RuntimeException("Authentication failed");
+            throw new ConflictException("Authentication failed");
 
         return new TokenResponse(tokenService.generateToken(user));
     }

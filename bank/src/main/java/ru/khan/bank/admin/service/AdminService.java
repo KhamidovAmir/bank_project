@@ -11,6 +11,7 @@ import ru.khan.bank.account.service.AccountService;
 import ru.khan.bank.admin.dto.AccountsPageableResponse;
 import ru.khan.bank.admin.dto.OperationsPageableResponse;
 import ru.khan.bank.admin.dto.UsersPageableResponse;
+import ru.khan.bank.common.exception.exceptions.AccessDeniedException;
 import ru.khan.bank.operation.entity.OperationsSort;
 import ru.khan.bank.operation.service.MoneyOperationService;
 import ru.khan.bank.user.entity.User;
@@ -107,6 +108,6 @@ public class AdminService {
 
     private void isAdmin(User user) {
         if (user.getRole() != UserRole.ADMIN)
-            throw new RuntimeException("You are not an admin");
+            throw new AccessDeniedException("You are not an admin");
     }
 }

@@ -4,7 +4,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import ru.khan.bank.auth.dto.JwtUser;
-import ru.khan.bank.user.entity.User;
+import ru.khan.bank.common.exception.exceptions.AuthenticationException;
 
 @Component
 public class UserProvider implements AuthUserProvider {
@@ -13,11 +13,11 @@ public class UserProvider implements AuthUserProvider {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null ||  !authentication.isAuthenticated())
-            throw new RuntimeException("User is not authenticated");
+            throw new AuthenticationException("User is not authenticated");
         Object principal = authentication.getPrincipal();
 
         if (!(principal instanceof JwtUser jwtUser))
-            throw new RuntimeException("Invalid authentication principal");
+            throw new AuthenticationException("Invalid authentication principal");
         return jwtUser;
     }
 }

@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.khan.bank.admin.dto.UsersPageableResponse;
 import ru.khan.bank.auth.dto.JwtUser;
 import ru.khan.bank.auth.service.AuthUserProvider;
+import ru.khan.bank.common.exception.exceptions.BadRequestException;
+import ru.khan.bank.common.exception.exceptions.NotFoundException;
 import ru.khan.bank.user.UserMapper;
 import ru.khan.bank.user.dto.CreateUserCommand;
 import ru.khan.bank.user.dto.UserProfileResponse;
@@ -34,8 +36,7 @@ public class UserService {
     public User createUser(CreateUserCommand command) {
 
         if (userRepository.existsByEmail(command.email()))
-            throw new RuntimeException("Email already exists, try another one");
-
+            throw new BadRequestException("Email already exists, try another one");
         User user = new User(
                 command.email(),
                 command.passwordHash(),
@@ -50,13 +51,14 @@ public class UserService {
     @Transactional(readOnly = true)
     public User getUserByEmailOrThrow(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+                .orElseThrow(() -> new NotFoundException("Invalid email or password"));
     }
 
     public User getCurrentUser(){
         JwtUser jwtUser = userProvider.getCurrentUser();
+
         return userRepository.findByEmail(jwtUser.email())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
     public UserProfileResponse getProfile(){
@@ -90,6 +92,6 @@ public class UserService {
 
     public User getUserByPublicId(UUID publicUserId) {
         return userRepository.findByPublicId(publicUserId)
-                .orElseThrow(() -> new RuntimeException("User with public id" + publicUserId + "not found"));
+                .orElseThrow(() -> new NotFoundException("User with public id" + publicUserId + "not found"));
     }
 }

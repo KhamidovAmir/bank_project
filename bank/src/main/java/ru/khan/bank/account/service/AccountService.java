@@ -14,7 +14,8 @@ import ru.khan.bank.account.entity.AccountSort;
 import ru.khan.bank.account.mapper.AccountMapper;
 import ru.khan.bank.account.repository.AccountRepository;
 import ru.khan.bank.admin.dto.AccountsPageableResponse;
-import ru.khan.bank.admin.dto.UsersPageableResponse;
+import ru.khan.bank.common.exception.exceptions.AccessDeniedException;
+import ru.khan.bank.common.exception.exceptions.NotFoundException;
 import ru.khan.bank.user.entity.User;
 import ru.khan.bank.user.service.UserService;
 
@@ -68,10 +69,10 @@ public class AccountService {
         User user = userService.getCurrentUser();
 
         Account account = accountRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+                .orElseThrow(() -> new NotFoundException("Account not found"));
 
         if (!account.getOwner().getId().equals(user.getId()))
-            throw new RuntimeException("You don't have access to this perform");
+            throw new AccessDeniedException("You don't have access to this perform");
 
         return accountMapper.toAccountResponse(
                 account.getPublicId(),
@@ -87,16 +88,16 @@ public class AccountService {
         User user = userService.getCurrentUser();
 
         var account = accountRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
-
+                .orElseThrow(() -> new NotFoundException("Account not found"));
         if (!account.getOwner().getId().equals(user.getId()))
-            throw new RuntimeException("You don't have access to this perform");
+            throw new AccessDeniedException("You don't have access to this perform");
         account.close();
     }
     public Account getAccount(UUID publicId) {
         return accountRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+                .orElseThrow(() -> new NotFoundException("Account not found"));
     }
+
 
     @Transactional(readOnly = true)
     public Page<AccountsPageableResponse> getAccounts(Pageable pageable) {
