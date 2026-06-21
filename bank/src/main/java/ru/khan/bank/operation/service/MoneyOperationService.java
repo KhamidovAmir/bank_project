@@ -9,6 +9,7 @@ import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.account.service.AccountService;
 import ru.khan.bank.admin.dto.OperationsPageableResponse;
 import ru.khan.bank.common.exception.exceptions.AccessDeniedException;
+import ru.khan.bank.common.exception.exceptions.BadRequestException;
 import ru.khan.bank.common.exception.exceptions.ConflictException;
 import ru.khan.bank.common.exception.exceptions.NotFoundException;
 import ru.khan.bank.operation.MoneyOperationMapper;
@@ -37,7 +38,7 @@ public class MoneyOperationService {
 
         try {
             moneyOperationExecutor.executeDeposit(operationId);
-        } catch (Exception e) {
+        } catch (NotFoundException | ConflictException  e) {
             var operation = moneyOperationRepository.findById(operationId).orElse(null);
 
             if (operation != null) {
