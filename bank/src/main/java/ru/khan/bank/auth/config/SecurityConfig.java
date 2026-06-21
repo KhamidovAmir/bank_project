@@ -2,6 +2,7 @@ package ru.khan.bank.auth.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -13,11 +14,12 @@ import ru.khan.bank.auth.service.TokenService;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain SecurityFilterChain(HttpSecurity http,
-                                                         TokenService tokenService) throws Exception {
+                                                         TokenService tokenService) {
          return http.
 
                  csrf(csrf -> csrf.disable())

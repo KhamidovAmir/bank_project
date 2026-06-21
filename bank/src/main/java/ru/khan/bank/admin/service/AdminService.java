@@ -3,6 +3,7 @@ package ru.khan.bank.admin.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.khan.bank.account.entity.Account;
@@ -22,6 +23,7 @@ import ru.khan.bank.user.service.UserService;
 import java.util.UUID;
 
 @Service
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminService {
 
     private final UserService userService;

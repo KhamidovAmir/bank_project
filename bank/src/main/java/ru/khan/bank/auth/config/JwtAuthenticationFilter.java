@@ -1,6 +1,7 @@
 package ru.khan.bank.auth.config;
 
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,15 +43,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(BEARER_PREFIX.length());
 
-        JwtUser jwtUser = tokenService.parse(token);
+        try {
+            JwtUser jwtUser = tokenService.parse(token);
 
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                jwtUser,
-                null,
-                List.of(new SimpleGrantedAuthority(ROLE_PREFIX + jwtUser.role()))
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    jwtUser,
+                    null,
+                    List.of(new SimpleGrantedAuthority(ROLE_PREFIX + jwtUser.role()))
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (JwtException e) {
+            SecurityContextHolder.clearContext();
+        }
         filterChain.doFilter(request, response);
     }
 }

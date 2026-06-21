@@ -88,7 +88,8 @@ public class MoneyOperationService {
         List<Long> accountsId = accountService.getAllMyAccounts(user.getId());
 
         if (accountsId.isEmpty())
-            throw new NotFoundException("Your accounts not found");
+            return Page.empty();
+
         return moneyOperationRepository.findAllByFromAccountIdInOrToAccountIdIn(accountsId, accountsId, pageable)
                 .map(operation -> moneyOperationMapper.toMoneyOperationsResponse(
                         operation.getPublicId(),

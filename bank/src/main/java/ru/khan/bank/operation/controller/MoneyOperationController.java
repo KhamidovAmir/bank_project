@@ -14,7 +14,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MoneyOperationController {
 
-    MoneyOperationService moneyOperationService;
+    private final MoneyOperationService moneyOperationService;
 
     @PostMapping("/deposit")
     public OperationResponse deposit(@RequestHeader("Idempotency-Key") String idempotencyKey,

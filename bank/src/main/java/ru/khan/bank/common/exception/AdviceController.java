@@ -3,6 +3,7 @@ package ru.khan.bank.common.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.khan.bank.common.exception.dto.ErrorResponse;
@@ -48,6 +49,16 @@ public class AdviceController {
     public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException e) {
         log.warn(e.getMessage());
         return buildResponse(HttpStatus.BAD_REQUEST, 400, e.getMessage());
+    }
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(org.springframework.security.access.AccessDeniedException e) {
+        log.warn(e.getMessage());
+        return buildResponse(HttpStatus.FORBIDDEN, 403, e.getMessage());
+    }
+    @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationCredentialsNotFoundException(AuthenticationCredentialsNotFoundException e) {
+        log.warn(e.getMessage());
+        return buildResponse(HttpStatus.UNAUTHORIZED, 401, e.getMessage());
     }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception e) {
