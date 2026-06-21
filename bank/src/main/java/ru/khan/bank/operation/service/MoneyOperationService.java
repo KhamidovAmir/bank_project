@@ -151,7 +151,7 @@ public class MoneyOperationService {
                 .orElseThrow(() -> new NotFoundException("Operation not found"));
 
         if (operation.isFailed() || operation.isCancelled())
-            throw new ConflictException("Operation failed");
+            throw new ConflictException(operation.getFailureReason());
 
         return new OperationResponse(operation.getStatus());
     }
