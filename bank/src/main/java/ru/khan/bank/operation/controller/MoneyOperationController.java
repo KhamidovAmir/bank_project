@@ -1,5 +1,6 @@
 package ru.khan.bank.operation.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -18,19 +19,19 @@ public class MoneyOperationController {
 
     @PostMapping("/deposit")
     public OperationResponse deposit(@RequestHeader("Idempotency-Key") String idempotencyKey,
-                                     @RequestBody DepositRequest request) {
+                                     @Valid @RequestBody DepositRequest request) {
 
         return moneyOperationService.deposit(idempotencyKey, request);
     }
     @PostMapping("/withdraw")
     public OperationResponse withdraw(@RequestHeader("Idempotency-Key") String idempotencyKey,
-                                         @RequestBody WithdrawRequest request){
+                                      @Valid @RequestBody WithdrawRequest request){
 
         return moneyOperationService.withdraw(idempotencyKey, request);
     }
     @PostMapping("/transfers")
     public OperationResponse transfers(@RequestHeader("Idempotency-Key") String idempotencyKey,
-                                         @RequestBody TransferRequest request){
+                                       @Valid @RequestBody TransferRequest request){
         return moneyOperationService.transfers(idempotencyKey, request);
     }
     @GetMapping
