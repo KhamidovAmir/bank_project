@@ -26,8 +26,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -121,6 +120,27 @@ public class AccountControllerIT {
         mockMvc.perform(get("/accounts/{publicId}", accountId)
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void closeAccount_shouldReturnIsOk() throws Exception {
+        String token = registerAndGetToken();
+        String accountId = createAccount(token);
+
+        mockMvc.perform(patch("/accounts/{publicId}/close", accountId)
+                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token))
+                .andExpect(status().isOk());
+    }
+    @Test
+    void closeAccount_throwAccessDeniedException() throws Exception {
+        String token = registerAndGetToken();
+        String accountId = createAccount(token);
+
+        token = registerAndGetToken();
+
+        mockMvc.perform(patch("/accounts/{publicId}/close", accountId)
+                        .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token))
+                .andExpect(status().isForbidden());
     }
 
     private String registerAndGetToken() throws Exception {
