@@ -26,6 +26,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.UUID;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -103,9 +104,23 @@ public class AccountControllerIT {
                 .andExpect(status().isInternalServerError());
     }
     @Test
+    void getAccount_shouldReturnIsNotFound() throws Exception {
+        String token = registerAndGetToken();
+
+        mockMvc.perform(get("/accounts/{publicId}", UUID.randomUUID())
+                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void getAccount_shouldReturnIsOk() throws Exception {
         String token = registerAndGetToken();
 
+        String accountId = createAccount(token);
+
+        mockMvc.perform(get("/accounts/{publicId}", accountId)
+                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token))
+                .andExpect(status().isOk());
     }
 
     private String registerAndGetToken() throws Exception {
@@ -119,10 +134,22 @@ public class AccountControllerIT {
         MvcResult result = mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
                 .andReturn();
 
         return objectMapper.readTree(result.getResponse().getContentAsString())
                 .get("token").asString();
+    }
+
+    private String createAccount(String token) throws Exception {
+        var request = new CreateAccountRequest(Currency.RUB);
+
+        MvcResult result = mockMvc.perform(post("/accounts")
+                        .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        return objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("publicId").asString();
     }
 }
