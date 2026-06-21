@@ -1,6 +1,6 @@
 package ru.khan.bank.operation.dto;
 
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
@@ -13,7 +13,7 @@ public record DepositRequest
                 UUID accountPublicId,
                 @NotNull
                 @Positive
-                @Min(10)
+                @DecimalMin(value = "10.00")
                 BigDecimal amount,
                 String description
         )
