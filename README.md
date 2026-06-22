@@ -35,8 +35,7 @@ Mini Banking System — учебный backend-проект мини-банко�
 
 - [architecture.md](./architecture.md)
 
-## Decision log
+## ToDo
 
-Ключевые архитектурные решения фиксируются в:
-
-- [decision-log.md](./decision-log.md)
+Функции и ошибки, которые надо добавить или поправить:
+- [Todo.md](ToDo.md)
