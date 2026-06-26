@@ -1,4 +1,4 @@
-package ru.khan.bank.operation;
+package ru.khan.bank.operation.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
