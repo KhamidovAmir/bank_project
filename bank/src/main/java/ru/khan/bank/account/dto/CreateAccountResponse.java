@@ -8,7 +8,7 @@ import java.util.UUID;
 public record CreateAccountResponse
         (
                 UUID publicId,
-                String account,
+                String accountNumber,
                 BigDecimal balance,
                 AccountStatus status
         )
