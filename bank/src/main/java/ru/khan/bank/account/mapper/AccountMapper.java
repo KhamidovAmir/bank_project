@@ -1,29 +1,21 @@
 package ru.khan.bank.account.mapper;
 
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
 import ru.khan.bank.account.dto.AccountPageResponse;
 import ru.khan.bank.account.dto.AccountResponse;
 import ru.khan.bank.account.dto.CreateAccountResponse;
-import ru.khan.bank.account.entity.AccountStatus;
-import ru.khan.bank.account.entity.Currency;
+import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.admin.dto.AccountsPageableResponse;
 
-import java.math.BigDecimal;
-import java.util.UUID;
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+public interface AccountMapper {
 
-@Component
-public class AccountMapper {
+    CreateAccountResponse toCreateAccountResponse(Account account);
 
-    public CreateAccountResponse toCreateAccountResponse(UUID publicId, String accountNumber, BigDecimal balance, AccountStatus status) {
-        return new CreateAccountResponse(publicId, accountNumber, balance, status);
-    }
-    public AccountPageResponse toAccountPageResponse(String accountNumber, BigDecimal balance, Currency currency, AccountStatus status) {
-        return new AccountPageResponse(accountNumber, balance, currency, status);
-    }
-    public AccountResponse toAccountResponse(UUID publicId, String accountNumber, BigDecimal balance, Currency currency, AccountStatus status) {
-        return new AccountResponse(publicId, accountNumber, balance, currency, status);
-    }
-    public AccountsPageableResponse toAccountsPageableResponse(UUID accountPublicId, String accountNumber, UUID ownerPublicId, String ownerFirstName, String ownerLastName, AccountStatus status) {
-        return new AccountsPageableResponse(accountPublicId, accountNumber, ownerPublicId, ownerFirstName, ownerLastName, status);
-    }
+    AccountPageResponse toAccountPageResponse(Account account);
+
+    AccountResponse toAccountResponse(Account account);
+
+    AccountsPageableResponse toAccountsPageableResponse(Account account);
 }

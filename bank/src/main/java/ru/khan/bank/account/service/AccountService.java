@@ -46,7 +46,7 @@ public class AccountService {
         Account account = new Account(user, accountNumber, request.currency());
 
         var saved = accountRepository.save(account);
-        return accountMapper.toCreateAccountResponse(saved.getPublicId(), saved.getAccountNumber(), saved.getBalance(), saved.getStatus());
+        return accountMapper.toCreateAccountResponse(saved);
 
     }
 
@@ -57,12 +57,7 @@ public class AccountService {
         Pageable pageable = PageRequest.of(page, size, sort.toSort(asc));
 
         return accountRepository.findAllByOwnerId(user.getId(), pageable)
-                .map(a -> accountMapper.toAccountPageResponse(
-                        a.getAccountNumber(),
-                        a.getBalance(),
-                        a.getCurrency(),
-                        a.getStatus()
-                        ));
+                .map(accountMapper::toAccountPageResponse);
     }
 
     public AccountResponse getAccountByPublicId(UUID publicId) {
@@ -74,13 +69,7 @@ public class AccountService {
         if (!account.getOwner().getId().equals(user.getId()))
             throw new AccessDeniedException("You don't have access to this perform");
 
-        return accountMapper.toAccountResponse(
-                account.getPublicId(),
-                account.getAccountNumber(),
-                account.getBalance(),
-                account.getCurrency(),
-                account.getStatus()
-        );
+        return accountMapper.toAccountResponse(account);
     }
 
     @Transactional
@@ -102,15 +91,7 @@ public class AccountService {
     @Transactional(readOnly = true)
     public Page<AccountsPageableResponse> getAccounts(Pageable pageable) {
         return accountRepository.findAll(pageable)
-                .map(account -> accountMapper.toAccountsPageableResponse(
-                        account.getPublicId(),
-                        account.getAccountNumber(),
-                        account.getOwner().getPublicId(),
-                        account.getOwner().getFirstName(),
-                        account.getOwner().getLastName(),
-                        account.getStatus()
-                        )
-                );
+                .map(accountMapper::toAccountsPageableResponse);
     }
 
     public List<Long> getAllMyAccounts(Long ownerId) {
