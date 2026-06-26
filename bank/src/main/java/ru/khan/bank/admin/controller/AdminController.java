@@ -14,8 +14,7 @@ import ru.khan.bank.user.entity.UserSort;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/admin")
-public class AdminController {
+public class AdminController implements AdminApi{
 
     private final AdminService adminService;
 
@@ -23,49 +22,39 @@ public class AdminController {
         this.adminService = adminService;
     }
 
-    @GetMapping("/users")
-    public Page<UsersPageableResponse> getUsers(@RequestParam(value = "size", defaultValue = "20") Integer size,
-                                                @RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                @RequestParam(value = "sort", defaultValue = "CREATED_AT") UserSort sort,
-                                                @RequestParam(value = "asc", defaultValue = "true") Boolean asc){
+    public Page<UsersPageableResponse> getUsers(Integer page, Integer size, UserSort sort, Boolean asc) {
         return adminService.getUsers(size, page, sort, asc);
     }
-    @GetMapping("/accounts")
-    public Page<AccountsPageableResponse> getAccounts(@RequestParam(value = "size", defaultValue = "20") Integer size,
-                                                      @RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                      @RequestParam(value = "sort", defaultValue = "CREATED_AT") AccountSort sort,
-                                                      @RequestParam(value = "asc", defaultValue = "true") Boolean asc){
+
+    public Page<AccountsPageableResponse> getAccounts(Integer page, Integer size, AccountSort sort, Boolean asc){
         return adminService.getAccounts(size, page, sort, asc);
     }
-    @GetMapping
-    public Page<OperationsPageableResponse> getOperations(@RequestParam(value = "size", defaultValue = "20") Integer size,
-                                                          @RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                          @RequestParam(value = "sort", defaultValue = "CREATED_AT") OperationsSort sort,
-                                                          @RequestParam(value = "asc", defaultValue = "true") Boolean asc){
+
+    public Page<OperationsPageableResponse> getOperations(Integer page, Integer size, OperationsSort sort, Boolean asc){
         return adminService.getOperations(size, page, sort, asc);
     }
-    @PatchMapping("/accounts/{accountPublicId}/block")
-    public ResponseEntity<Void> blockAccount(@PathVariable UUID accountPublicId){
+
+    public ResponseEntity<Void> blockAccount(UUID accountPublicId){
         adminService.blockAccount(accountPublicId);
         return ResponseEntity.ok().build();
     }
-    @PatchMapping("/accounts/{accountPublicId}/unblock")
-    public ResponseEntity<Void> unblockAccount(@PathVariable UUID accountPublicId){
+
+    public ResponseEntity<Void> unblockAccount(UUID accountPublicId){
         adminService.unblockAccount(accountPublicId);
         return ResponseEntity.ok().build();
     }
-    @PatchMapping("/users/{userId}/block")
-    public ResponseEntity<Void> blockUser(@PathVariable UUID publicUserId){
+
+    public ResponseEntity<Void> blockUser(UUID publicUserId){
         adminService.blockUser(publicUserId);
         return ResponseEntity.ok().build();
     }
-    @PatchMapping("/users/{userId}/unblock")
-    public ResponseEntity<Void> unblockUser(@PathVariable UUID publicUserId){
+
+    public ResponseEntity<Void> unblockUser(UUID publicUserId){
         adminService.unblockUser(publicUserId);
         return ResponseEntity.ok().build();
     }
-    @PatchMapping("/users/{userId}/delete")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID publicUserId){
+
+    public ResponseEntity<Void> deleteUser(UUID publicUserId){
         adminService.deleteUser(publicUserId);
         return ResponseEntity.ok().build();
     }
