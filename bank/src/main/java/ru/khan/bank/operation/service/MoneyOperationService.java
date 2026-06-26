@@ -9,10 +9,9 @@ import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.account.service.AccountService;
 import ru.khan.bank.admin.dto.OperationsPageableResponse;
 import ru.khan.bank.common.exception.exceptions.AccessDeniedException;
-import ru.khan.bank.common.exception.exceptions.BadRequestException;
 import ru.khan.bank.common.exception.exceptions.ConflictException;
 import ru.khan.bank.common.exception.exceptions.NotFoundException;
-import ru.khan.bank.operation.MoneyOperationMapper;
+import ru.khan.bank.operation.mapper.MoneyOperationMapper;
 import ru.khan.bank.operation.dto.*;
 import ru.khan.bank.operation.entity.OperationsSort;
 import ru.khan.bank.operation.repository.MoneyOperationRepository;
@@ -92,18 +91,7 @@ public class MoneyOperationService {
             return Page.empty();
 
         return moneyOperationRepository.findAllByFromAccountIdInOrToAccountIdIn(accountsId, accountsId, pageable)
-                .map(operation -> moneyOperationMapper.toMoneyOperationsResponse(
-                        operation.getPublicId(),
-                        operation.getOperationNumber(),
-                        operation.getType(),
-                        operation.getStatus(),
-                        operation.getFromAccountId(),
-                        operation.getToAccountId(),
-                        operation.getAmount(),
-                        operation.getCurrency(),
-                        operation.getCreatedAt(),
-                        operation.getCompletedAt()
-                ));
+                .map(moneyOperationMapper::toMoneyOperationsResponse);
     }
 
     public Page<MoneyOperationsResponse> getMyOperationOnAccount(Integer size, Integer page, OperationsSort sort, Boolean asc, UUID accountPublicId) {
@@ -116,34 +104,12 @@ public class MoneyOperationService {
         Pageable pageable = PageRequest.of(page, size, sort.toSort(asc));
 
         return moneyOperationRepository.findAllByFromAccountIdOrToAccountId(account.getId(), account.getId(), pageable)
-                .map(operation -> moneyOperationMapper.toMoneyOperationsResponse(
-                        operation.getPublicId(),
-                        operation.getOperationNumber(),
-                        operation.getType(),
-                        operation.getStatus(),
-                        operation.getFromAccountId(),
-                        operation.getToAccountId(),
-                        operation.getAmount(),
-                        operation.getCurrency(),
-                        operation.getCreatedAt(),
-                        operation.getCompletedAt()
-                ));
+                .map(moneyOperationMapper::toMoneyOperationsResponse);
     }
 
     public Page<OperationsPageableResponse> getOperations(Pageable pageable) {
         return moneyOperationRepository.findAll(pageable)
-                .map(operation -> moneyOperationMapper.toOperationsPageable(
-                        operation.getPublicId(),
-                        operation.getType(),
-                        operation.getStatus(),
-                        operation.getFromAccountId(),
-                        operation.getToAccountId(),
-                        operation.getAmount(),
-                        operation.getCurrency(),
-                        operation.getCreatedAt(),
-                        operation.getCompletedAt()
-                        )
-                );
+                .map(moneyOperationMapper::toOperationsPageableResponse);
     }
 
     private OperationResponse checkStatus(String idempotencyKey){
