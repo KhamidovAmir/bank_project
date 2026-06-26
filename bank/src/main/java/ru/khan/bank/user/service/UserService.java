@@ -9,7 +9,7 @@ import ru.khan.bank.auth.dto.JwtUser;
 import ru.khan.bank.auth.service.AuthUserProvider;
 import ru.khan.bank.common.exception.exceptions.BadRequestException;
 import ru.khan.bank.common.exception.exceptions.NotFoundException;
-import ru.khan.bank.user.UserMapper;
+import ru.khan.bank.user.mapper.UserMapper;
 import ru.khan.bank.user.dto.CreateUserCommand;
 import ru.khan.bank.user.dto.UserProfileResponse;
 import ru.khan.bank.user.entity.User;
@@ -63,13 +63,8 @@ public class UserService {
 
     public UserProfileResponse getProfile(){
         User user = getCurrentUser();
-        return userMapper.toUserProfileResponse(
-                user.getEmail(),
-                user.getPublicId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getRole().name(),
-                user.getStatus().name());
+        return userMapper.toUserProfileResponse(user);
+
     }
 
     public boolean isActive(User user){
@@ -78,16 +73,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public Page<UsersPageableResponse> getUsers(Pageable pageable){
         return userRepository.findAll(pageable)
-                .map(user ->
-                    userMapper.toUsersPageableResponse(
-                            user.getPublicId(),
-                            user.getFirstName(),
-                            user.getLastName(),
-                            user.getRole(),
-                            user.getStatus(),
-                            user.getCreatedAt()
-                            )
-                );
+                .map(userMapper::toUsersPageableResponse );
     }
 
     public User getUserByPublicId(UUID publicUserId) {
