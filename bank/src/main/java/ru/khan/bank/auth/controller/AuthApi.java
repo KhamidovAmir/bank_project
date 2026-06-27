@@ -16,11 +16,11 @@ import ru.khan.bank.auth.dto.TokenResponse;
 public interface AuthApi {
 
     @PostMapping("/register")
-    @Operation(description = "Регистрация пользователя и выдача токена")
+    @Operation(summary = "Регистрация пользователя и выдача токена")
     ResponseEntity<TokenResponse> register(@Valid @RequestBody CreateUserRequest request);
 
     @PostMapping("/login")
-    @Operation(description = "Авторизация пользователя и выдача токена")
+    @Operation(summary = "Авторизация пользователя и выдача токена")
     ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request);
     
 }

@@ -16,29 +16,29 @@ import java.util.UUID;
 public interface MoneyOperationApi {
 
     @PostMapping("/deposit")
-    @Operation(description = "Операция пополнения счета")
+    @Operation(summary = "Операция пополнения счета")
     OperationResponse deposit(@RequestHeader("Idempotency-Key")
-                              @Parameter(description = "Ключ идемпотентности", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92", required = true)
+                              @Parameter( description = "Уникальный ключ идемпотентности. Повторные запросы с одинаковым ключом не приводят к повторному выполнению перевода.", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92")
                               String idempotencyKey,
                               @Valid @RequestBody DepositRequest request);
 
     @PostMapping("/withdraw")
-    @Operation(description = "Операция вывода средств со счета")
+    @Operation(summary = "Операция вывода средств со счета")
     OperationResponse withdraw(@RequestHeader("Idempotency-Key")
-                               @Parameter(description = "Ключ идемпотентности", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92", required = true)
+                               @Parameter( description = "Уникальный ключ идемпотентности. Повторные запросы с одинаковым ключом не приводят к повторному выполнению перевода.", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92")
                                String idempotencyKey,
                                @Valid @RequestBody WithdrawRequest request);
 
     @PostMapping("/transfers")
-    @Operation(description = "Операция перевода средств между счетами")
+    @Operation(summary = "Операция перевода средств между счетами")
     OperationResponse transfers(@RequestHeader("Idempotency-Key")
-                                @Parameter(description = "Ключ идемпотентности", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92", required = true)
+                                @Parameter( description = "Уникальный ключ идемпотентности. Повторные запросы с одинаковым ключом не приводят к повторному выполнению перевода.", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92")
                                 String idempotencyKey,
                                 @Valid @RequestBody TransferRequest request);
 
 
     @GetMapping
-    @Operation(description = "Получение операций самого пользователя при помощи пагинации")
+    @Operation(summary = "Получение операций самого пользователя при помощи пагинации")
     Page<MoneyOperationsResponse> getOperations(@RequestParam(value = "size", defaultValue = "20")
                                                 @Parameter(description = "Размер страницы - пагинации", example = "20", required = true)
                                                 Integer size,
@@ -57,7 +57,7 @@ public interface MoneyOperationApi {
 
 
     @GetMapping("/{accountPublicId}")
-    @Operation(description = "Получение операций по конкретному счета пользователя при помощи пагинации")
+    @Operation(summary = "Получение операций по конкретному счета пользователя при помощи пагинации")
     Page<MoneyOperationsResponse> getOperationsOnAccount(@RequestParam(value = "size", defaultValue = "20")
                                                          @Parameter(description = "Размер страницы - пагинации", example = "20", required = true)
                                                          Integer size,

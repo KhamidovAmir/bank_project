@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Schema(
-        description = ""
+        description = "Информация по операции"
 )
 public record OperationsPageableResponse
         (

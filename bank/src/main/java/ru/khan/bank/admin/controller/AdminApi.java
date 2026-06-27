@@ -20,7 +20,7 @@ import java.util.UUID;
 public interface AdminApi {
 
     @GetMapping("/users")
-    @Operation(description = "Получение пользователей с помощью пагинации")
+    @Operation(summary = "Получение пользователей с помощью пагинации")
     Page<UsersPageableResponse> getUsers(
             @RequestParam(value = "size", defaultValue = "20")
             @Parameter(description = "Размер страницы - пагинации", example = "20", required = true)
@@ -39,7 +39,7 @@ public interface AdminApi {
             Boolean asc);
 
     @GetMapping("/accounts")
-    @Operation(description = "Получение счетов с помощью пагинации")
+    @Operation(summary = "Получение счетов с помощью пагинации")
     Page<AccountsPageableResponse> getAccounts(
             @RequestParam(value = "size", defaultValue = "20")
             @Parameter(description = "Размер страницы - пагинации", example = "20", required = true)
@@ -58,7 +58,7 @@ public interface AdminApi {
             Boolean asc);
 
     @GetMapping
-    @Operation(description = "Получение операций с помощью пагинации")
+    @Operation(summary = "Получение операций с помощью пагинации")
     Page<OperationsPageableResponse> getOperations(
             @RequestParam(value = "size", defaultValue = "20")
             @Parameter(description = "Размер страницы - пагинации", example = "20", required = true)
@@ -77,32 +77,32 @@ public interface AdminApi {
             Boolean asc);
 
     @PatchMapping("/accounts/{accountPublicId}/block")
-    @Operation(description = "Блокировка счета по публичному ID формата UUID")
+    @Operation(summary = "Блокировка счета по публичному ID формата UUID")
     ResponseEntity<Void> blockAccount(@PathVariable
-                                      @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92", required = true)
+                                      @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92")
                                       UUID accountPublicId);
 
     @PatchMapping("/accounts/{accountPublicId}/unblock")
-    @Operation(description = "Разблокировка счета по публичному ID формата UUID")
+    @Operation(summary = "Разблокировка счета по публичному ID формата UUID")
     ResponseEntity<Void> unblockAccount(@PathVariable
-                                        @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92", required = true)
+                                        @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92")
                                         UUID accountPublicId);
 
     @PatchMapping("/users/{userId}/block")
-    @Operation(description = "Блокировка пользователя по публичному ID формата UUID")
+    @Operation(summary = "Блокировка пользователя по публичному ID формата UUID")
     ResponseEntity<Void> blockUser(@PathVariable
-                                   @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92", required = true)
+                                   @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92")
                                    UUID userId);
 
     @PatchMapping("/users/{userId}/unblock")
-    @Operation(description = "Разблокировка счета по публичному ID формата UUID")
+    @Operation(summary = "Разблокировка счета по публичному ID формата UUID")
     ResponseEntity<Void> unblockUser(@PathVariable
-                                     @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92", required = true)
+                                     @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92")
                                      UUID userId);
 
     @PatchMapping("/users/{userId}/delete")
-    @Operation(description = "Удаление пользователя по публичному ID формата UUID")
+    @Operation(summary = "Удаление пользователя по публичному ID формата UUID")
     ResponseEntity<Void> deleteUser(@PathVariable
-                                    @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92", required = true)
+                                    @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92")
                                     UUID userId);
 }

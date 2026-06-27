@@ -11,6 +11,6 @@ import ru.khan.bank.user.dto.UserProfileResponse;
 public interface UserApi {
 
     @GetMapping("/me")
-    @Operation(description = "Информация по профилю пользователя")
+    @Operation(summary = "Информация по профилю пользователя")
     UserProfileResponse getMyProfile();
 }
