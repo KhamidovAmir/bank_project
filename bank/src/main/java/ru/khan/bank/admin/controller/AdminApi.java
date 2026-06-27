@@ -35,7 +35,7 @@ public interface AdminApi {
             UserSort sort,
 
             @RequestParam(value = "asc", defaultValue = "true")
-            @Parameter(description = "Сортировка по направлению: true — по возрастанию, false — по убыванию", example = "true")
+            @Parameter(description = "Сортировка по направлению: true — по возрастанию, false — по убыванию", example = "true", required = true)
             Boolean asc);
 
     @GetMapping("/accounts")
@@ -54,7 +54,7 @@ public interface AdminApi {
             AccountSort sort,
 
             @RequestParam(value = "asc", defaultValue = "true")
-            @Parameter(description = "Сортировка по направлению: true — по возрастанию, false — по убыванию", example = "true")
+            @Parameter(description = "Сортировка по направлению: true — по возрастанию, false — по убыванию", example = "true", required = true)
             Boolean asc);
 
     @GetMapping
@@ -73,36 +73,36 @@ public interface AdminApi {
             OperationsSort sort,
 
             @RequestParam(value = "asc", defaultValue = "true")
-            @Parameter(description = "Сортировка по направлению: true — по возрастанию, false — по убыванию", example = "true")
+            @Parameter(description = "Сортировка по направлению: true — по возрастанию, false — по убыванию", example = "true", required = true)
             Boolean asc);
 
     @PatchMapping("/accounts/{accountPublicId}/block")
     @Operation(description = "Блокировка счета по публичному ID формата UUID")
     ResponseEntity<Void> blockAccount(@PathVariable
-                                      @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92")
+                                      @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92", required = true)
                                       UUID accountPublicId);
 
     @PatchMapping("/accounts/{accountPublicId}/unblock")
     @Operation(description = "Разблокировка счета по публичному ID формата UUID")
     ResponseEntity<Void> unblockAccount(@PathVariable
-                                        @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92")
+                                        @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92", required = true)
                                         UUID accountPublicId);
 
     @PatchMapping("/users/{userId}/block")
     @Operation(description = "Блокировка пользователя по публичному ID формата UUID")
     ResponseEntity<Void> blockUser(@PathVariable
-                                   @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92")
+                                   @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92", required = true)
                                    UUID userId);
 
     @PatchMapping("/users/{userId}/unblock")
     @Operation(description = "Разблокировка счета по публичному ID формата UUID")
     ResponseEntity<Void> unblockUser(@PathVariable
-                                     @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92")
+                                     @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92", required = true)
                                      UUID userId);
 
     @PatchMapping("/users/{userId}/delete")
     @Operation(description = "Удаление пользователя по публичному ID формата UUID")
     ResponseEntity<Void> deleteUser(@PathVariable
-                                    @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92")
+                                    @Parameter(description = "Публичный ID формата UUID", example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92", required = true)
                                     UUID userId);
 }

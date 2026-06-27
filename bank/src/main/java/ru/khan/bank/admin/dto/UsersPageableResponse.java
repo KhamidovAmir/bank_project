@@ -13,32 +13,38 @@ import java.util.UUID;
 public record UsersPageableResponse
         (
                 @Schema(
-                        description = "Публичный ID пользователя формата UUID"
+                        description = "Публичный ID пользователя формата UUID",
+                        example = "2e2aef60-c2c7-4d3d-80d7-5fb4d3d73b92"
                 )
                 UUID publicId,
 
                 @Schema(
-                        description = "Имя пользователя"
+                        description = "Имя пользователя",
+                        example = "Ivan"
                 )
                 String firstName,
 
                 @Schema(
-                        description = "Фамилия пользователя"
+                        description = "Фамилия пользователя",
+                        example = "Ivanov"
                 )
                 String lastName,
 
                 @Schema(
-                        description = "Роль пользователя"
+                        description = "Роль пользователя",
+                        example = "CUSTOMER"
                 )
                 UserRole role,
 
                 @Schema(
-                        description = "Статус пользователя"
+                        description = "Статус пользователя",
+                        example = "ACTIVE"
                 )
                 UserStatus status,
 
                 @Schema(
-                        description = "Дата и время создания аккаунта для пользователя"
+                        description = "Дата и время создания аккаунта для пользователя",
+                        example = "2024-05-20T14:35:10.123"
                 )
                 LocalDateTime createdAt
         )
