@@ -18,7 +18,7 @@ import ru.khan.bank.auth.service.TokenService;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain SecurityFilterChain(HttpSecurity http,
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                          TokenService tokenService) {
          return http.
 

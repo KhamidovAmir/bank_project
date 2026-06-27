@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ActiveProfiles("test")
 @SpringBootTest
 @Testcontainers
-public class AuthServiceIT {
+class AuthServiceIT {
 
     @Container
     @ServiceConnection
@@ -47,8 +47,8 @@ public class AuthServiceIT {
         var request = createUserRequest();
         var response = authService.register(request);
 
-        assertThat(response).isNotNull();
-        assertThat(response).isInstanceOf(TokenResponse.class);
+        assertThat(response).isNotNull()
+                .isInstanceOf(TokenResponse.class);
     }
     @Test
     void register_shouldThrowExceptionDuplicateEmail(){
@@ -70,8 +70,8 @@ public class AuthServiceIT {
 
         var response = authService.login(requestLogin);
 
-        assertThat(response).isNotNull();
-        assertThat(response).isInstanceOf(TokenResponse.class);
+        assertThat(response).isNotNull()
+                .isInstanceOf(TokenResponse.class);
     }
     @Test
     void login_shouldThrowExceptionWrongPassword(){

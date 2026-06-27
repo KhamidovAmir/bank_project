@@ -25,6 +25,8 @@ import java.util.UUID;
 @Service
 public class AccountService {
 
+    private static final String ACCOUNT_NOT_FOUND = "Account not found";
+
     private final AccountRepository accountRepository;
     private final UserService userService;
     private final AccountNumberGenerator accountNumberGenerator;
@@ -64,7 +66,7 @@ public class AccountService {
         User user = userService.getCurrentUser();
 
         Account account = accountRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new NotFoundException("Account not found"));
+                .orElseThrow(() -> new NotFoundException(ACCOUNT_NOT_FOUND));
 
         if (!account.getOwner().getId().equals(user.getId()))
             throw new AccessDeniedException("You don't have access to this perform");
@@ -77,14 +79,14 @@ public class AccountService {
         User user = userService.getCurrentUser();
 
         var account = accountRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new NotFoundException("Account not found"));
+                .orElseThrow(() -> new NotFoundException(ACCOUNT_NOT_FOUND));
         if (!account.getOwner().getId().equals(user.getId()))
             throw new AccessDeniedException("You don't have access to this perform");
         account.close();
     }
     public Account getAccount(UUID publicId) {
         return accountRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new NotFoundException("Account not found"));
+                .orElseThrow(() -> new NotFoundException(ACCOUNT_NOT_FOUND));
     }
 
 

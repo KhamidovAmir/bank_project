@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 @SpringBootTest
 @Testcontainers
-public class AccountServiceIT {
+class AccountServiceIT {
 
     @Container
     @ServiceConnection
@@ -80,7 +80,7 @@ public class AccountServiceIT {
         var anotherUser = createUser();
         var user = createUser();
 
-        var accountForAnotherUser = createAccount(anotherUser, Currency.RUB);
+        createAccount(anotherUser, Currency.RUB);
         var accountForUser = createAccount(user, Currency.RUB);
 
         when(userService.getCurrentUser()).thenReturn(user);
@@ -119,7 +119,9 @@ public class AccountServiceIT {
 
         when(userService.getCurrentUser()).thenReturn(user);
 
-        assertThatThrownBy(() -> accountService.getAccountByPublicId(accountForAnother.getPublicId()))
+        UUID publicId = accountForAnother.getPublicId();
+
+        assertThatThrownBy(() -> accountService.getAccountByPublicId(publicId))
                 .isInstanceOf(RuntimeException.class);
     }
 
@@ -146,7 +148,9 @@ public class AccountServiceIT {
         var anotherUser = createUser();
         when(userService.getCurrentUser()).thenReturn(anotherUser);
 
-        assertThatThrownBy(() -> accountService.closeAccount(account.getPublicId()))
+        UUID publicId = account.getPublicId();
+
+        assertThatThrownBy(() -> accountService.closeAccount(publicId))
                 .isInstanceOf(RuntimeException.class);
     }
 

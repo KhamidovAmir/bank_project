@@ -12,11 +12,9 @@ import ru.khan.bank.account.service.AccountService;
 import ru.khan.bank.admin.dto.AccountsPageableResponse;
 import ru.khan.bank.admin.dto.OperationsPageableResponse;
 import ru.khan.bank.admin.dto.UsersPageableResponse;
-import ru.khan.bank.common.exception.exceptions.AccessDeniedException;
 import ru.khan.bank.operation.entity.OperationsSort;
 import ru.khan.bank.operation.service.MoneyOperationService;
 import ru.khan.bank.user.entity.User;
-import ru.khan.bank.user.entity.UserRole;
 import ru.khan.bank.user.entity.UserSort;
 import ru.khan.bank.user.service.UserService;
 

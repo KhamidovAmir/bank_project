@@ -15,7 +15,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import ru.khan.bank.account.dto.CreateAccountRequest;
 import ru.khan.bank.account.entity.Currency;
-import ru.khan.bank.admin.service.AdminService;
 import ru.khan.bank.auth.dto.CreateUserRequest;
 import tools.jackson.databind.ObjectMapper;
 
@@ -28,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-public class AdminControllerIT {
+class AdminControllerIT {
 
     private static final String BEARER_PREFIX = "Bearer ";
 

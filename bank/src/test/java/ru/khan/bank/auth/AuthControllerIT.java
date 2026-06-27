@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Testcontainers
 @ActiveProfiles("test")
-public class AuthControllerIT {
+class AuthControllerIT {
 
     @Container
     @ServiceConnection

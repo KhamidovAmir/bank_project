@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 @SpringBootTest
 @Testcontainers
-public class MoneyOperationServiceIT {
+class MoneyOperationServiceIT {
 
     @Container
     @ServiceConnection

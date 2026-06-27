@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 @SpringBootTest
 @Testcontainers
-public class AdminServiceIT {
+class AdminServiceIT {
 
     @Container
     @ServiceConnection
@@ -59,9 +59,9 @@ public class AdminServiceIT {
 
     @Test
     void getUsers_shouldReturnPageOfUsers(){
-        var user1 = createUser();
-        var user2 = createUser();
-        var user3 = createUser();
+        createUser();
+        createUser();
+        createUser();
 
         var admin = createAdmin();
 
@@ -78,8 +78,6 @@ public class AdminServiceIT {
     @Test
     void getUsers_shouldThrowExceptionNotAdmin(){
         var user1 = createUser();
-        var user2 = createUser();
-        var user3 = createUser();
 
         when(authUserProvider.getCurrentUser()).thenReturn(returnJwtUser(user1));
 
@@ -92,9 +90,9 @@ public class AdminServiceIT {
         var user2 = createUser();
         var user3 = createUser();
 
-        var account1 = createAccount(user1);
-        var account2 = createAccount(user2);
-        var account3 = createAccount(user3);
+        createAccount(user1);
+        createAccount(user2);
+        createAccount(user3);
 
         var admin = createAdmin();
 
@@ -112,12 +110,6 @@ public class AdminServiceIT {
     @Test
     void getAccounts_shouldThrowExceptionNotAdmin(){
         var user1 = createUser();
-        var user2 = createUser();
-        var user3 = createUser();
-
-        var account1 = createAccount(user1);
-        var account2 = createAccount(user2);
-        var account3 = createAccount(user3);
 
         when(authUserProvider.getCurrentUser()).thenReturn(returnJwtUser(user1));
 
@@ -156,7 +148,9 @@ public class AdminServiceIT {
 
         when(authUserProvider.getCurrentUser()).thenReturn(returnJwtUser(user2));
 
-        assertThatThrownBy(() -> adminService.unblockAccount(account.getPublicId()))
+        var publicId = account.getPublicId();
+
+        assertThatThrownBy(() -> adminService.unblockAccount(publicId))
                 .isInstanceOf(RuntimeException.class);
     }
 
@@ -189,7 +183,9 @@ public class AdminServiceIT {
 
         assertThat(account.getStatus()).isEqualTo(AccountStatus.ACTIVE);
 
-        assertThatThrownBy(() -> adminService.blockAccount(account.getPublicId()))
+        var publicId = account.getPublicId();
+
+        assertThatThrownBy(() -> adminService.blockAccount(publicId))
                 .isInstanceOf(RuntimeException.class);
     }
     @Test
@@ -225,7 +221,9 @@ public class AdminServiceIT {
 
         assertThat(user.getStatus()).isEqualTo(UserStatus.BLOCKED);
 
-        assertThatThrownBy(() -> adminService.unblockAccount(user.getPublicId()))
+        var publicId = user.getPublicId();
+
+        assertThatThrownBy(() -> adminService.unblockAccount(publicId))
                 .isInstanceOf(RuntimeException.class);
     }
 

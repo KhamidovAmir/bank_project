@@ -201,33 +201,32 @@ public class MoneyOperation {
     }
 
     private void validateAccounts() {
-        if (type == OperationType.DEPOSIT) {
-            if (fromAccountId != null) {
-                throw new BadRequestException("Deposit must not have fromAccountId");
+        switch (type) {
+            case DEPOSIT -> {
+                if (fromAccountId != null) {
+                    throw new BadRequestException("Deposit must not have fromAccountId");
+                }
+                if (toAccountId == null) {
+                    throw new BadRequestException("Deposit requires toAccountId");
+                }
             }
 
-            if (toAccountId == null) {
-                throw new BadRequestException("Deposit requires toAccountId");
-            }
-        }
-
-        if (type == OperationType.WITHDRAW) {
-            if (fromAccountId == null) {
-                throw new BadRequestException("Withdraw requires fromAccountId");
-            }
-
-            if (toAccountId != null) {
-                throw new BadRequestException("Withdraw must not have toAccountId");
-            }
-        }
-
-        if (type == OperationType.TRANSFER) {
-            if (fromAccountId == null || toAccountId == null) {
-                throw new BadRequestException("Transfer requires both accounts");
+            case WITHDRAW -> {
+                if (fromAccountId == null) {
+                    throw new BadRequestException("Withdraw requires fromAccountId");
+                }
+                if (toAccountId != null) {
+                    throw new BadRequestException("Withdraw must not have toAccountId");
+                }
             }
 
-            if (fromAccountId.equals(toAccountId)) {
-                throw new BadRequestException("Transfer between same account is not allowed");
+            case TRANSFER -> {
+                if (fromAccountId == null || toAccountId == null) {
+                    throw new BadRequestException("Transfer requires both accounts");
+                }
+                if (fromAccountId.equals(toAccountId)) {
+                    throw new BadRequestException("Transfer between same account is not allowed");
+                }
             }
         }
     }

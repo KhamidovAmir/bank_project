@@ -105,10 +105,10 @@ public class Account {
 
         changeStatus(AccountStatus.CLOSED);
     }
-    public Boolean ensureActive() {
+    public boolean ensureActive() {
         return this.status.equals(AccountStatus.ACTIVE);
     }
-    public Boolean ensureIsOwner(Long userId) {
+    public boolean ensureIsOwner(Long userId) {
         return this.owner.getId().equals(userId);
     }
 

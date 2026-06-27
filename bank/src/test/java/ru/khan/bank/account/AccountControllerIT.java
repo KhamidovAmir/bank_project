@@ -15,26 +15,22 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import ru.khan.bank.account.dto.CreateAccountRequest;
-import ru.khan.bank.account.entity.Account;
 import ru.khan.bank.account.entity.Currency;
 import ru.khan.bank.account.repository.AccountRepository;
 import ru.khan.bank.auth.dto.CreateUserRequest;
-import ru.khan.bank.user.entity.User;
-import ru.khan.bank.user.entity.UserRole;
 import ru.khan.bank.user.repository.UserRepository;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
 @ActiveProfiles("test")
-public class AccountControllerIT {
+class AccountControllerIT {
 
     private static final String BEARER_PREFIX = "Bearer ";
 
