@@ -1,6 +1,5 @@
 package ru.khan.bank.operation.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -11,42 +10,39 @@ import ru.khan.bank.operation.service.MoneyOperationService;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/operations")
 @RequiredArgsConstructor
-public class MoneyOperationController {
+public class MoneyOperationController implements MoneyOperationApi {
 
     private final MoneyOperationService moneyOperationService;
 
-    @PostMapping("/deposit")
-    public OperationResponse deposit(@RequestHeader("Idempotency-Key") String idempotencyKey,
-                                     @Valid @RequestBody DepositRequest request) {
-
+    public OperationResponse deposit(String idempotencyKey,
+                                     DepositRequest request) {
         return moneyOperationService.deposit(idempotencyKey, request);
     }
-    @PostMapping("/withdraw")
-    public OperationResponse withdraw(@RequestHeader("Idempotency-Key") String idempotencyKey,
-                                      @Valid @RequestBody WithdrawRequest request){
+
+    public OperationResponse withdraw(String idempotencyKey,
+                                      WithdrawRequest request){
 
         return moneyOperationService.withdraw(idempotencyKey, request);
     }
-    @PostMapping("/transfers")
-    public OperationResponse transfers(@RequestHeader("Idempotency-Key") String idempotencyKey,
-                                       @Valid @RequestBody TransferRequest request){
+
+    public OperationResponse transfers(String idempotencyKey,
+                                       TransferRequest request){
         return moneyOperationService.transfers(idempotencyKey, request);
     }
-    @GetMapping
-    public Page<MoneyOperationsResponse> getOperations(@RequestParam(value = "size", defaultValue = "20") Integer size,
-                                                       @RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                       @RequestParam(value = "sort", defaultValue = "CREATED_AT") OperationsSort sort,
-                                                       @RequestParam(value = "asc", defaultValue = "true") Boolean asc){
+
+    public Page<MoneyOperationsResponse> getOperations(Integer size,
+                                                       Integer page,
+                                                       OperationsSort sort,
+                                                       Boolean asc){
         return moneyOperationService.getAllMyOperations(size, page, sort, asc);
     }
-    @GetMapping("/{accountPublicId}")
-    public Page<MoneyOperationsResponse> getOperationsOnAccount(@RequestParam(value = "size", defaultValue = "20") Integer size,
-                                          @RequestParam(value = "page", defaultValue = "0") Integer page,
-                                          @RequestParam(value = "sort", defaultValue = "CREATED_AT") OperationsSort sort,
-                                          @RequestParam(value = "asc", defaultValue = "true") Boolean asc,
-                                          @PathVariable UUID accountPublicId) {
+
+    public Page<MoneyOperationsResponse> getOperationsOnAccount(Integer size,
+                                                                Integer page,
+                                                                OperationsSort sort,
+                                                                Boolean asc,
+                                                                UUID accountPublicId) {
         return moneyOperationService.getMyOperationOnAccount(size, page, sort, asc, accountPublicId);
     }
 
